@@ -54,38 +54,6 @@ flutter test
 
 On a real device or emulator, the gallery and camera need the platform setup described in [Platform setup](#platform-setup).
 
-## Progress
-
-Every step was delivered as a numbered [OpenSpec](https://github.com/Fission-AI/OpenSpec) change (proposal, design, specs, tasks), merged by pull request. Details in `ROADMAP.md` and `openspec/changes/archive/`.
-
-| # | Change | Result |
-| --- | --- | --- |
-| 001 | setup-project-structure | Layered folder structure |
-| 002 | app-shell | `go_router`, `http`, app shell |
-| 003 | universities-data | Domain model, API service, repository with sequential `id` |
-| 004 | universities-list-viewmodel | List state, pagination by 20, list/grid toggle |
-| 005 | university-detail | Detail screen, gallery/camera image, student count validator, platform permissions |
-| 006 | add-test-coverage | Remaining test gaps closed |
-| 007 | readme-documentation | First README (architecture, decisions) |
-| 008 | fix-detail-back-navigation | Back from detail returns to the list |
-| 009 | migrate-to-riverpod | `provider` replaced by `flutter_riverpod` with code generation |
-| 010 | app-icon | iOS and Android launcher icon |
-| 011 | splash-screen | Native and animated Flutter splash |
-| 012 | ui-ux-improvements | Brand light/dark theme, portrait lock, transitions, skeleton, shared state widgets, a11y |
-| 013 | refactor-views-widgets | Views split into single-purpose widgets |
-| 014 | dismiss-keyboard-on-tap-outside | Keyboard closes when tapping outside the student count field |
-
-All required features and the bonus (hand-written infinite scroll) are implemented. Pending items are tracked as [GitHub issues](../../issues).
-
-## AI-assisted workflow
-
-The project was built with [Claude Code](https://claude.com/claude-code) under spec-driven development:
-
-- `CLAUDE.md` and `.github/copilot-instructions.md` hold the architecture rules, conventions and workflow the assistant follows.
-- `.claude/skills/` and `.claude/commands/` hold the project skills (`openspec-*`, `/commit`, `/opsx:*`).
-- Each feature starts as an OpenSpec change, then is implemented, tested, archived and merged by PR. Work items are tracked in GitHub issues using `.github/ISSUE_TEMPLATE/change.md`.
-- Commits follow Conventional Commits and reference their change number.
-
 ## Architecture
 
 Layered architecture following the Flutter recommendations: UI (MVVM), Data, and a small Domain layer that both depend on. Dependencies point inwards: `ui` and `data` know `domain`; `domain` knows nothing about Flutter widgets or HTTP.
@@ -157,26 +125,9 @@ View  ->  Provider  ->  Repository (interface)  ->  Service  ->  HTTP / image pi
 - **iOS:** `ios/Runner/Info.plist` declares `NSPhotoLibraryUsageDescription` and `NSCameraUsageDescription`.
 - **Android:** `AndroidManifest.xml` declares the camera feature as optional. The `CAMERA` permission is intentionally absent: `image_picker` opens the system camera app, and declaring the permission would force a runtime request.
 
-## App icon
+## App icon and splash
 
-The launcher icon is the triangular mark of `assets/tyba.svg`. Sources live in `assets/icon/` (`tyba_mark.svg`, plus the 1024 px `app_icon.png` and `app_icon_foreground.png` rendered from it). iOS and Android icons (including the Android adaptive icon) are generated with `flutter_launcher_icons`, configured in `pubspec.yaml`:
-
-```sh
-dart run flutter_launcher_icons
-git checkout ios/Runner.xcodeproj/project.pbxproj
-```
-
-The second command discards a `project.pbxproj` edit the generator makes, which breaks `ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS`.
-
-## Splash screen
-
-Startup has two layers. The native launch screen (triangular mark on white, Android 12+ included) is generated with `flutter_native_splash`, configured in `pubspec.yaml`:
-
-```sh
-dart run flutter_native_splash:create
-```
-
-Then the Flutter `/splash` route fades in the wordmark (`assets/images/tyba_wordmark.png`, exported from `assets/tyba.svg`). The `splashReady` provider waits for the universities prefetch and a minimum of 800 ms (`splashMinDuration`), whichever is later. A failed prefetch does not block: the list opens and shows its own error with retry.
+Launcher icon (`flutter_launcher_icons`) and native launch screen (`flutter_native_splash`) are generated from `assets/`; both are configured in `pubspec.yaml`. The Flutter `/splash` route then fades in the wordmark while the universities prefetch (minimum 800 ms); a failed prefetch does not block the list, which shows its own retry.
 
 ## Testing
 
