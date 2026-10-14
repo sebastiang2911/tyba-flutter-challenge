@@ -54,7 +54,7 @@ You are a COORDINATOR: keep one thin thread, delegate heavy work to sub-agents, 
 ## Architecture & Conventions
 
 - Follow the `flutter-apply-architecture-best-practices` skill: UI (MVVM) / Data / optional Domain.
-- Layout is hybrid: `lib/data/{models,repositories,services}`, `lib/domain/{models,repositories,validators}`, `lib/ui/{core,features/<feature>/{view_models,views}}`, plus `lib/app/` (app, router, theme). `test/` mirrors `lib/`.
+- Layout is hybrid: `lib/data/{models,repositories,services}`, `lib/domain/{models,repositories,failures,validators}`, `lib/ui/{core,features/<feature>/{view_models,views}}`, plus `lib/app/` (app, router, theme). `test/` mirrors `lib/`.
 - State: ViewModels extend `ChangeNotifier`, receive repositories via constructor, expose immutable state. Views use `ListenableBuilder`; no business logic in Views. DI with `provider`.
 - Data: Services are stateless API wrappers; Repositories consume Services and return domain models. No use cases layer.
 - Navigation: `go_router`.
@@ -75,4 +75,4 @@ You are a COORDINATOR: keep one thin thread, delegate heavy work to sub-agents, 
 
 ## Current State
 
-Freshly created project (default template, only `lib/main.dart`, no extra dependencies).
+App shell (`002-app-shell`) and universities data layer (`003-universities-data`) are done; see `ROADMAP.md` for pending work.

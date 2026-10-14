@@ -6,10 +6,10 @@ Pending work for the Tyba technical test. Each step is delivered as a numbered O
 
 - [x] `001-setup-project-structure`: folder structure (archived)
 - [x] `002-app-shell`: dependencies (`provider`, `go_router`, `http`) and app shell (archived, PR #1)
+- [x] `003-universities-data`: domain model, API service and repository with sequential `id` in source order (archived)
 
 ## Next
 
-- [ ] Data: service + API model + repository with sequential `id` in source order
 - [ ] List ViewModel: loading/error/empty/data states, pagination 20 at a time, ListView/GridView toggle
 - [ ] Detail: image (gallery/camera), student count with validator, `Info.plist` / `AndroidManifest.xml` permissions
 - [ ] Tests: unit (repository, validator, ViewModels), widget (list, detail)
