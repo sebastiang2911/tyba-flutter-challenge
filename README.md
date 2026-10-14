@@ -2,6 +2,22 @@
 
 Flutter app that lists universities from a remote JSON, lets the user switch between list and grid, and open a detail screen where an image and a student count can be assigned to a university.
 
+## Screenshots
+
+### Android
+
+|  | List | Grid | Detail |
+| :---: | :---: | :---: | :---: |
+| Light | <img src="docs/android/light_list_android.png" width="200" alt="Android light list"> | <img src="docs/android/light_grid_android.png" width="200" alt="Android light grid"> | <img src="docs/android/light_detail_android.png" width="200" alt="Android light detail"> |
+| Dark | <img src="docs/android/dark_list_android.png" width="200" alt="Android dark list"> | <img src="docs/android/dark_grid_android.png" width="200" alt="Android dark grid"> | <img src="docs/android/dark_detail_android.png" width="200" alt="Android dark detail"> |
+
+### iOS
+
+|  | List | Grid | Detail |
+| :---: | :---: | :---: | :---: |
+| Light | <img src="docs/iOS/light_list_ios.png" width="200" alt="iOS light list"> | <img src="docs/iOS/light_grid_ios.png" width="200" alt="iOS light grid"> | <img src="docs/iOS/light_detail_ios.png" width="200" alt="iOS light detail"> |
+| Dark | <img src="docs/iOS/dark_list_ios.png" width="200" alt="iOS dark list"> | <img src="docs/iOS/dark_grid_ios.png" width="200" alt="iOS dark grid"> | <img src="docs/iOS/dark_detail_ios.png" width="200" alt="iOS dark detail"> |
+
 ## Features
 
 - Branded startup: native launch screen, then an animated splash that prefetches the universities.
