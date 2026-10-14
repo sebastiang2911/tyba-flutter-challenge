@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
 import '../../../../app/router.dart';
+import '../../../../domain/failures/failure.dart';
 import '../../../../domain/models/university.dart';
-import '../view_models/universities_list_view_model.dart';
+import '../providers/providers.dart';
 
-class UniversitiesListView extends StatefulWidget {
+class UniversitiesListView extends ConsumerStatefulWidget {
   const UniversitiesListView({super.key});
 
   @override
-  State<UniversitiesListView> createState() => _UniversitiesListViewState();
+  ConsumerState<UniversitiesListView> createState() =>
+      _UniversitiesListViewState();
 }
 
-class _UniversitiesListViewState extends State<UniversitiesListView> {
+class _UniversitiesListViewState extends ConsumerState<UniversitiesListView> {
   /// Distance from the end of the content (px) that triggers the next page.
   static const _loadMoreThreshold = 200.0;
 
@@ -35,75 +37,64 @@ class _UniversitiesListViewState extends State<UniversitiesListView> {
 
   void _onScroll() {
     if (_controller.position.extentAfter < _loadMoreThreshold) {
-      context.read<UniversitiesListViewModel>().loadMore();
+      ref.read(visibleCountProvider.notifier).loadMore();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final viewModel = context.read<UniversitiesListViewModel>();
-    return ListenableBuilder(
-      listenable: viewModel,
-      builder: (context, _) {
-        final state = viewModel.state;
-        return Scaffold(
-          appBar: AppBar(
-            title: const Text('Universities'),
-            actions: [
-              IconButton(
-                tooltip: state.layout == UniversitiesLayout.list
-                    ? 'Show grid'
-                    : 'Show list',
-                icon: Icon(
-                  state.layout == UniversitiesLayout.list
-                      ? Icons.grid_view
-                      : Icons.view_list,
-                ),
-                onPressed: viewModel.toggleLayout,
+    final universities = ref.watch(universitiesProvider);
+    final layout = ref.watch(universitiesLayoutProvider);
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Universities'),
+        actions: [
+          IconButton(
+            tooltip: layout == UniversitiesLayout.list
+                ? 'Show grid'
+                : 'Show list',
+            icon: Icon(
+              layout == UniversitiesLayout.list
+                  ? Icons.grid_view
+                  : Icons.view_list,
+            ),
+            onPressed: ref.read(universitiesLayoutProvider.notifier).toggle,
+          ),
+        ],
+      ),
+      body: universities.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, _) => Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(error is Failure ? error.message : 'Something went wrong'),
+              const SizedBox(height: 12),
+              FilledButton(
+                onPressed: () => ref.invalidate(universitiesProvider),
+                child: const Text('Retry'),
               ),
             ],
           ),
-          body: switch (state.status) {
-            UniversitiesListStatus.loading => const Center(
-              child: CircularProgressIndicator(),
-            ),
-            UniversitiesListStatus.error => Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(state.errorMessage ?? 'Something went wrong'),
-                  const SizedBox(height: 12),
-                  FilledButton(
-                    onPressed: viewModel.load,
-                    child: const Text('Retry'),
-                  ),
-                ],
-              ),
-            ),
-            UniversitiesListStatus.empty => const Center(
-              child: Text('No universities found'),
-            ),
-            UniversitiesListStatus.data => _UniversitiesContent(
-              state: state,
-              controller: _controller,
-            ),
-          },
-        );
-      },
+        ),
+        data: (all) => all.isEmpty
+            ? const Center(child: Text('No universities found'))
+            : _UniversitiesContent(layout: layout, controller: _controller),
+      ),
     );
   }
 }
 
-class _UniversitiesContent extends StatelessWidget {
-  const _UniversitiesContent({required this.state, required this.controller});
+class _UniversitiesContent extends ConsumerWidget {
+  const _UniversitiesContent({required this.layout, required this.controller});
 
-  final UniversitiesListState state;
+  final UniversitiesLayout layout;
   final ScrollController controller;
 
   @override
-  Widget build(BuildContext context) {
-    final items = state.visible;
-    if (state.layout == UniversitiesLayout.grid) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final items = ref.watch(visibleUniversitiesProvider).items;
+    if (layout == UniversitiesLayout.grid) {
       return GridView.builder(
         controller: controller,
         padding: const EdgeInsets.all(8),

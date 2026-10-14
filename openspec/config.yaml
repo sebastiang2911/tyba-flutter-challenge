@@ -3,7 +3,7 @@ schema: spec-driven
 # Project context (optional)
 # This is shown to AI when creating artifacts.
 context: |
-  Tech stack: Flutter/Dart, MVVM with ChangeNotifier + provider, go_router
+  Tech stack: Flutter/Dart, MVVM with code-generated Riverpod providers (flutter_riverpod, riverpod_annotation, riverpod_generator; run `dart run build_runner build -d` after changing providers), go_router
   We use conventional commits
   Change naming: every change name MUST start with a zero-padded sequential
   prefix, e.g. 001-setup-project-structure, 002-load-universities.

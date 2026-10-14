@@ -1,85 +1,77 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
 import '../../../../app/router.dart';
+import '../../../../domain/failures/failure.dart';
 import '../../../../domain/models/university.dart';
 import '../../../../domain/models/university_profile.dart';
 import '../../../../domain/validators/student_count_validator.dart';
-import '../view_models/university_detail_view_model.dart';
+import '../providers/providers.dart';
 
-class UniversityDetailView extends StatelessWidget {
-  const UniversityDetailView({super.key});
+class UniversityDetailView extends ConsumerWidget {
+  const UniversityDetailView({super.key, required this.id});
+
+  final int id;
 
   @override
-  Widget build(BuildContext context) {
-    final viewModel = context.read<UniversityDetailViewModel>();
-    return ListenableBuilder(
-      listenable: viewModel,
-      builder: (context, _) {
-        final state = viewModel.state;
-        return PopScope(
-          // Deep link: nothing below the detail, so go to the list on back.
-          canPop: context.canPop(),
-          onPopInvokedWithResult: (didPop, _) {
-            if (!didPop) context.go(AppRoutes.list);
-          },
-          child: Scaffold(
-            appBar: AppBar(
-              leading: BackButton(
-                onPressed: () => context.canPop()
-                    ? context.pop()
-                    : context.go(AppRoutes.list),
-              ),
-              title: Text(state.university?.name ?? 'University'),
-            ),
-            body: switch (state.status) {
-              UniversityDetailStatus.loading => const Center(
-                child: CircularProgressIndicator(),
-              ),
-              UniversityDetailStatus.error => Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(state.errorMessage ?? 'Something went wrong'),
-                    const SizedBox(height: 12),
-                    FilledButton(
-                      onPressed: viewModel.load,
-                      child: const Text('Retry'),
-                    ),
-                  ],
-                ),
-              ),
-              UniversityDetailStatus.data => _DetailContent(
-                state: state,
-                viewModel: viewModel,
-              ),
-            },
-          ),
-        );
+  Widget build(BuildContext context, WidgetRef ref) {
+    final university = ref.watch(universityProvider(id));
+    return PopScope(
+      // Deep link: nothing below the detail, so go to the list on back.
+      canPop: context.canPop(),
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) context.go(AppRoutes.list);
       },
+      child: Scaffold(
+        appBar: AppBar(
+          leading: BackButton(
+            onPressed: () =>
+                context.canPop() ? context.pop() : context.go(AppRoutes.list),
+          ),
+          title: Text(university.value?.name ?? 'University'),
+        ),
+        body: university.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, _) => Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(error is Failure ? error.message : 'Something went wrong'),
+                const SizedBox(height: 12),
+                FilledButton(
+                  onPressed: () => ref.invalidate(universityProvider(id)),
+                  child: const Text('Retry'),
+                ),
+              ],
+            ),
+          ),
+          data: (university) => _DetailContent(id: id, university: university),
+        ),
+      ),
     );
   }
 }
 
-class _DetailContent extends StatelessWidget {
-  const _DetailContent({required this.state, required this.viewModel});
+class _DetailContent extends ConsumerWidget {
+  const _DetailContent({required this.id, required this.university});
 
-  final UniversityDetailState state;
-  final UniversityDetailViewModel viewModel;
+  final int id;
+  final University university;
 
   @override
-  Widget build(BuildContext context) {
-    final university = state.university!;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(universityProfileProvider(id));
+    final notifier = ref.read(universityProfileProvider(id).notifier);
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
         _ImageSection(
           imagePath: state.profile.imagePath,
           error: state.imageError,
-          onPick: viewModel.pickImage,
+          onPick: notifier.pickImage,
         ),
         const SizedBox(height: 16),
         _InfoSection(university: university),
@@ -87,7 +79,7 @@ class _DetailContent extends StatelessWidget {
         _StudentCountSection(
           initialValue: state.profile.studentCount,
           error: state.studentCountError,
-          onSubmit: viewModel.submitStudentCount,
+          onSubmit: notifier.submitStudentCount,
         ),
       ],
     );

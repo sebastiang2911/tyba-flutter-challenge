@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tyba_technical_test/app/app.dart';
 import 'package:tyba_technical_test/app/router.dart';
 import 'package:tyba_technical_test/domain/models/university.dart';
 import 'package:tyba_technical_test/ui/features/universities/views/university_detail_view.dart';
 
 import '../../../../support/fake_university_profile_repository.dart';
 import '../../../../support/fake_university_repository.dart';
+import '../../../../support/pump_app.dart';
 
 Future<FakeUniversityProfileRepository> _pump(
   WidgetTester tester, {
@@ -20,14 +20,11 @@ Future<FakeUniversityProfileRepository> _pump(
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
   profiles ??= FakeUniversityProfileRepository();
-  final router = buildRouter();
-  await tester.pumpWidget(
-    App(
-      repository: FakeUniversityRepository(universities ?? buildUniversities(5))
-        ..fail = fail,
-      profileRepository: profiles,
-      router: router,
-    ),
+  final router = await pumpApp(
+    tester,
+    universities: FakeUniversityRepository(universities ?? buildUniversities(5))
+      ..fail = fail,
+    profiles: profiles,
   );
   await tester.pumpAndSettle();
   router.go(AppRoutes.detailFor(id));
@@ -89,6 +86,23 @@ void main() {
 
     expect(find.text('University not found'), findsOneWidget);
     expect(find.text('Retry'), findsOneWidget);
+  });
+
+  testWidgets('retry reloads the university after a failure', (tester) async {
+    final universities = FakeUniversityRepository(buildUniversities(5))
+      ..fail = true;
+    final router = await pumpApp(tester, universities: universities);
+    await tester.pumpAndSettle();
+    router.go(AppRoutes.detailFor(1));
+    await tester.pumpAndSettle();
+    expect(find.text('Could not load universities'), findsOneWidget);
+
+    universities.fail = false;
+    await tester.tap(find.text('Retry'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Retry'), findsNothing);
+    expect(find.textContaining('Country: Country'), findsOneWidget);
   });
 
   testWidgets('shows the picked image', (tester) async {
@@ -168,12 +182,10 @@ void main() {
     tester.view.physicalSize = const Size(800, 2000);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
-    await tester.pumpWidget(
-      App(
-        repository: FakeUniversityRepository(buildUniversities(5)),
-        profileRepository: FakeUniversityProfileRepository(),
-        router: buildRouter()..go(AppRoutes.detailFor(1)),
-      ),
+    await pumpApp(
+      tester,
+      universities: FakeUniversityRepository(buildUniversities(5)),
+      location: AppRoutes.detailFor(1),
     );
     await tester.pumpAndSettle();
     expect(find.byType(UniversityDetailView), findsOneWidget);
@@ -191,12 +203,10 @@ void main() {
     tester.view.physicalSize = const Size(800, 2000);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
-    await tester.pumpWidget(
-      App(
-        repository: FakeUniversityRepository(buildUniversities(5)),
-        profileRepository: FakeUniversityProfileRepository(),
-        router: buildRouter()..go(AppRoutes.detailFor(1)),
-      ),
+    await pumpApp(
+      tester,
+      universities: FakeUniversityRepository(buildUniversities(5)),
+      location: AppRoutes.detailFor(1),
     );
     await tester.pumpAndSettle();
 
