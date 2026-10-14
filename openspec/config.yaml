@@ -1,0 +1,33 @@
+schema: spec-driven
+
+# Project context (optional)
+# This is shown to AI when creating artifacts.
+context: |
+  Tech stack: Flutter/Dart, MVVM with ChangeNotifier + provider, go_router
+  We use conventional commits
+  Change naming: every change name MUST start with a zero-padded sequential
+  prefix, e.g. 001-setup-project-structure, 002-load-universities.
+  Before `openspec new change`, run `fd -d1 . openspec/changes openspec/changes/archive`
+  and use the next number after the highest one found (archived changes count).
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always include a "Non-goals" section
+#     tasks:
+#       - Break tasks into chunks of max 2 hours
+
+# Per-operation guidance (optional)
+# Add advisory guidance for how apply and archive work should be conducted.
+# This is separate from artifact rules above.
+# Example:
+#   operations:
+#     apply:
+#       guidance:
+#         - Keep test summaries concise
+#     archive:
+#       guidance:
+#         - Summarize the archive outcome before finishing
