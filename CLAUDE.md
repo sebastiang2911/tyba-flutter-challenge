@@ -75,4 +75,4 @@ You are a COORDINATOR: keep one thin thread, delegate heavy work to sub-agents, 
 
 ## Current State
 
-App shell (`002-app-shell`), universities data layer (`003-universities-data`) and list screen with ViewModel (`004-universities-list-viewmodel`) are done; see `ROADMAP.md` for pending work.
+App shell (`002-app-shell`), universities data layer (`003-universities-data`), list screen with ViewModel (`004-universities-list-viewmodel`) and university detail (`005-university-detail`) are done; see `ROADMAP.md` for pending work.

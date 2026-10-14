@@ -1,5 +1,9 @@
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
+import '../domain/repositories/university_profile_repository.dart';
+import '../domain/repositories/university_repository.dart';
+import '../ui/features/universities/view_models/university_detail_view_model.dart';
 import '../ui/features/universities/views/universities_list_view.dart';
 import '../ui/features/universities/views/university_detail_view.dart';
 
@@ -22,7 +26,14 @@ GoRouter buildRouter() {
         path: AppRoutes.detail,
         builder: (context, state) {
           final id = int.parse(state.pathParameters['id']!);
-          return UniversityDetailView(id: id);
+          return ChangeNotifierProvider(
+            create: (context) => UniversityDetailViewModel(
+              context.read<UniversityRepository>(),
+              context.read<UniversityProfileRepository>(),
+              universityId: id,
+            )..load(),
+            child: const UniversityDetailView(),
+          );
         },
       ),
     ],

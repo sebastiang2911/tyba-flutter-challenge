@@ -26,4 +26,13 @@ class FakeUniversityRepository implements UniversityRepository {
     if (fail) throw const Failure('Could not load universities');
     return universities;
   }
+
+  @override
+  Future<University> getUniversityById(int id) async {
+    final all = await getUniversities();
+    return all.firstWhere(
+      (u) => u.id == id,
+      orElse: () => throw const Failure('University not found'),
+    );
+  }
 }

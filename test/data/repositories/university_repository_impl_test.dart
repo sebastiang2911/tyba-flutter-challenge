@@ -70,4 +70,36 @@ void main() {
 
     expect(repo.getUniversities(), throwsA(isA<Failure>()));
   });
+
+  group('getUniversityById', () {
+    test('returns the university with that id', () async {
+      final body = jsonEncode([_json('Same'), _json('Same'), _json('C')]);
+      final repo = _repo((_) async => http.Response(body, 200));
+
+      final university = await repo.getUniversityById(1);
+
+      expect(university.id, 1);
+      expect(university.name, 'Same');
+    });
+
+    test('throws a Failure for an unknown id', () {
+      final repo = _repo(
+        (_) async => http.Response(jsonEncode([_json('A')]), 200),
+      );
+
+      expect(
+        repo.getUniversityById(5),
+        throwsA(const Failure('University not found')),
+      );
+    });
+
+    test('throws a Failure when the source cannot be loaded', () {
+      final repo = _repo((_) async => http.Response('boom', 500));
+
+      expect(
+        repo.getUniversityById(0),
+        throwsA(const Failure('Could not load universities')),
+      );
+    });
+  });
 }
