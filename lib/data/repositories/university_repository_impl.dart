@@ -20,4 +20,13 @@ class UniversityRepositoryImpl implements UniversityRepository {
       throw const Failure('Could not load universities');
     }
   }
+
+  @override
+  Future<University> getUniversityById(int id) async {
+    final universities = await getUniversities();
+    for (final university in universities) {
+      if (university.id == id) return university;
+    }
+    throw const Failure('University not found');
+  }
 }

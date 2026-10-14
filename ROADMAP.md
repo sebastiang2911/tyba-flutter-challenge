@@ -8,10 +8,10 @@ Pending work for the Tyba technical test. Each step is delivered as a numbered O
 - [x] `002-app-shell`: dependencies (`provider`, `go_router`, `http`) and app shell (archived, PR #1)
 - [x] `003-universities-data`: domain model, API service and repository with sequential `id` in source order (archived)
 - [x] `004-universities-list-viewmodel`: list ViewModel (states, pagination by 20, list/grid toggle), real list screen and `provider` wiring (archived)
+- [x] `005-university-detail`: detail screen, image from gallery/camera, student count validator, `Info.plist` / `AndroidManifest.xml` config (archived)
 
 ## Next
 
-- [ ] Detail: image (gallery/camera), student count with validator, `Info.plist` / `AndroidManifest.xml` permissions
 - [ ] Tests: unit (repository, validator, ViewModels), widget (list, detail)
 - [ ] README: architecture, decisions, how to run
 

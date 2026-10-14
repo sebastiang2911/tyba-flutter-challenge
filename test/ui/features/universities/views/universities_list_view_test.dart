@@ -4,7 +4,10 @@ import 'package:go_router/go_router.dart';
 import 'package:tyba_technical_test/app/app.dart';
 import 'package:tyba_technical_test/app/router.dart';
 
+import 'package:tyba_technical_test/ui/features/universities/views/university_detail_view.dart';
+
 import '../../../../support/fake_university_repository.dart';
+import '../../../../support/fake_university_profile_repository.dart';
 
 Future<FakeUniversityRepository> _pump(
   WidgetTester tester, {
@@ -14,7 +17,13 @@ Future<FakeUniversityRepository> _pump(
 }) async {
   final repository = FakeUniversityRepository(buildUniversities(count))
     ..fail = fail;
-  await tester.pumpWidget(App(repository: repository, router: router));
+  await tester.pumpWidget(
+    App(
+      repository: repository,
+      profileRepository: FakeUniversityProfileRepository(),
+      router: router,
+    ),
+  );
   return repository;
 }
 
@@ -112,7 +121,7 @@ void main() {
 
     await tester.tap(find.text('University 2'));
     await tester.pumpAndSettle();
-    expect(find.text('University detail #2'), findsOneWidget);
+    expect(find.byType(UniversityDetailView), findsOneWidget);
 
     router.go(AppRoutes.list);
     await tester.pumpAndSettle();
@@ -120,6 +129,6 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('University 3'));
     await tester.pumpAndSettle();
-    expect(find.text('University detail #3'), findsOneWidget);
+    expect(find.byType(UniversityDetailView), findsOneWidget);
   });
 }

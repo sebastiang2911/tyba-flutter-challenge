@@ -1,4 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- No CAMERA permission: image_picker uses the system camera app, and
+         declaring it would require a runtime request. -->
+    <uses-feature android:name="android.hardware.camera" android:required="false"/>
     <application
         android:label="tyba_technical_test"
         android:name="${applicationName}"
@@ -37,6 +40,9 @@
 
          In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin. -->
     <queries>
+        <intent>
+            <action android:name="android.media.action.IMAGE_CAPTURE"/>
+        </intent>
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>

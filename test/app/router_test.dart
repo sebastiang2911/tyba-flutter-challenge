@@ -4,12 +4,14 @@ import 'package:tyba_technical_test/app/app.dart';
 import 'package:tyba_technical_test/app/router.dart';
 
 import '../support/fake_university_repository.dart';
+import '../support/fake_university_profile_repository.dart';
 
 Future<GoRouter> _pump(WidgetTester tester) async {
   final router = buildRouter();
   await tester.pumpWidget(
     App(
-      repository: FakeUniversityRepository(buildUniversities(3)),
+      repository: FakeUniversityRepository(buildUniversities(10)),
+      profileRepository: FakeUniversityProfileRepository(),
       router: router,
     ),
   );
@@ -30,7 +32,7 @@ void main() {
     router.go('/university/3');
     await tester.pumpAndSettle();
 
-    expect(find.text('University detail #3'), findsOneWidget);
+    expect(find.text('University 3'), findsWidgets);
   });
 
   testWidgets('detailFor builds a path that resolves to that id', (
@@ -41,6 +43,6 @@ void main() {
     router.go(AppRoutes.detailFor(7));
     await tester.pumpAndSettle();
 
-    expect(find.text('University detail #7'), findsOneWidget);
+    expect(find.text('University 7'), findsWidgets);
   });
 }
