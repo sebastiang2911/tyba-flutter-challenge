@@ -23,10 +23,11 @@ Run one complete SDD cycle for the given requirement inside its own git worktree
    ```
    If the branch exists, drop `-b`. If the directory exists, reuse it. Then `cd .trees/<change>` and run `flutter pub get` (a worktree shares no `.dart_tool/` or build output).
 
-4. **Run SDD inside the worktree** (cwd = `.trees/<change>`), one phase at a time, committing at the end of each phase:
-   1. **Propose**: `openspec-propose` (it may call `openspec-explore` first if the requirement is vague). Create `openspec new change "<change>"`, then proposal, design, tasks (specs when behavior changes). Commit: `docs(<NNN>): add proposal, design and tasks`.
-   2. **Apply**: `openspec-apply-change`. Commit atomically per task group, e.g. `feat(<NNN>): ...`, `test(<NNN>): ...`. Run `flutter analyze` and `flutter test` before every commit; never commit on red.
-   3. **Archive**: `openspec-archive-change`. Commit: `chore(<NNN>): archive change`.
+4. **Run SDD inside the worktree** (cwd = `.trees/<change>`), one phase at a time. **Do not commit between phases: the whole change lands as exactly ONE commit on the branch.**
+   1. **Propose**: `openspec-propose` (it may call `openspec-explore` first if the requirement is vague). Create `openspec new change "<change>"`, then proposal, design, tasks (specs when behavior changes).
+   2. **Apply**: `openspec-apply-change`. Run `flutter analyze` and `flutter test`; they must pass before the commit.
+   3. **Archive**: `openspec-archive-change`. Also mark the matching item in `ROADMAP.md` (move it to Done) so it ships in the same commit.
+   4. **Single commit**: `git add -A`, review with `git status --short`, then one conventional commit `<type>(<NNN>): <summary>` (imperative, <= 72 chars). Put the phases in the body as short bullets (planning, implementation, archive). Never create more than one commit per worktree; if something must change afterwards, `git commit --amend --no-edit`.
    - Pause and ask when a phase reveals a design issue or needs scope beyond the artifacts; update artifacts (`openspec-update-change`) instead of drifting.
    - Keep the scope tight: do exactly what the change defines, no extra code or dependencies.
 
@@ -39,7 +40,7 @@ Run one complete SDD cycle for the given requirement inside its own git worktree
 
 6. **Hand off the PR** (do not run it): follow the `/commit` command logic from the worktree and share one script block with `git push -u origin <branch>` and `gh pr create` (Why linking the change, What changed, How to test, Notes).
 
-7. **Report** (in Spanish, concise): worktree path, branch, change name, commits made per phase, analyze/test result, the PR script. After the PR is merged, cleanup is manual:
+7. **Report** (in Spanish, concise): worktree path, branch, change name, the single commit (hash and message), analyze/test result, the PR script. After the PR is merged, cleanup is manual:
    ```
    git worktree remove .trees/<change>
    git branch -d <branch>

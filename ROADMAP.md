@@ -5,10 +5,10 @@ Pending work for the Tyba technical test. Each step is delivered as a numbered O
 ## Done
 
 - [x] `001-setup-project-structure`: folder structure (archived)
+- [x] `002-app-shell`: dependencies (`provider`, `go_router`, `http`) and app shell (archived, PR #1)
 
 ## Next
 
-- [ ] `002-...`: add dependencies (`provider`, `go_router`, `http`) and the app shell (`app/`, router, theme, `main.dart`)
 - [ ] Data: service + API model + repository with sequential `id` in source order
 - [ ] List ViewModel: loading/error/empty/data states, pagination 20 at a time, ListView/GridView toggle
 - [ ] Detail: image (gallery/camera), student count with validator, `Info.plist` / `AndroidManifest.xml` permissions
