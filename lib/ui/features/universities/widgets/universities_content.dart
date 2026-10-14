@@ -25,6 +25,9 @@ class _UniversitiesContentState extends ConsumerState<UniversitiesContent> {
   /// Distance from the end of the content (px) that triggers the next page.
   static const _loadMoreThreshold = 200.0;
 
+  /// Grid card height (px) at the default text scale.
+  static const _cardExtent = 180.0;
+
   final _controller = ScrollController();
 
   @override
@@ -54,18 +57,20 @@ class _UniversitiesContentState extends ConsumerState<UniversitiesContent> {
   Widget build(BuildContext context) {
     final visible = ref.watch(visibleUniversitiesProvider);
     final items = visible.items;
+    final textScale = MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 2.0);
     if (widget.layout == UniversitiesLayout.grid) {
       return CustomScrollView(
         controller: _controller,
         slivers: [
           SliverPadding(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(12),
             sliver: SliverGrid.builder(
-              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
                 maxCrossAxisExtent: 240,
-                mainAxisExtent: 120,
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
+                // Grows with the text scale so large fonts do not overflow.
+                mainAxisExtent: _cardExtent * textScale,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
               ),
               itemCount: items.length,
               itemBuilder: (context, index) => UniversityCard(
@@ -81,6 +86,7 @@ class _UniversitiesContentState extends ConsumerState<UniversitiesContent> {
     }
     return ListView.builder(
       controller: _controller,
+      padding: const EdgeInsets.symmetric(vertical: 6),
       itemCount: items.length + (visible.hasMore ? 1 : 0),
       itemBuilder: (context, index) => index == items.length
           ? const LoadMoreIndicator()
