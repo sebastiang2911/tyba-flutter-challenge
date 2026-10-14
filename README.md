@@ -4,6 +4,7 @@ Flutter app that lists universities from a remote JSON, lets the user switch bet
 
 ## Features
 
+- Branded startup: native launch screen, then an animated splash that prefetches the universities.
 - Universities list loaded from `https://tyba-assets.s3.amazonaws.com/FE-Engineer-test/universities.json`.
 - Toggle between `ListView` and `GridView`.
 - Infinite scroll: 20 items at a time, hand-written (no external library).
@@ -76,7 +77,7 @@ View  ->  Provider  ->  Repository (interface)  ->  Service  ->  HTTP / image pi
 - `main.dart` runs `ProviderScope(child: App())`. `lib/app/providers.dart` builds the concrete http client, services and repositories as keepAlive providers; tests override them with fakes.
 - `App` is a `ConsumerWidget` that watches the `appRouter` provider.
 - List state is split into small providers: `universities` (Future), `universitiesLayout`, `visibleCount` and the derived `visibleUniversities`. Detail uses the `university(id)` family Future and the `universityProfileNotifier(id)` family notifier (both auto-dispose).
-- `go_router` defines two routes: `/` (list) and `/university/:id` (detail). The list opens the detail with `push`, so back returns to the list; if the detail was opened directly (no history), back navigates to `/`.
+- `go_router` defines three routes: `/splash` (initial), `/` (list) and `/university/:id` (detail). The splash replaces itself with the list (`go`), so back never returns to it. The list opens the detail with `push`, so back returns to the list; if the detail was opened directly (no history), back navigates to `/`.
 - Views and providers depend on the repository interfaces, so tests inject fakes (`test/support/`).
 - Providers are code-generated. After changing one, run `dart run build_runner build -d`; the generated `*.g.dart` files are committed.
 
@@ -105,6 +106,16 @@ git checkout ios/Runner.xcodeproj/project.pbxproj
 ```
 
 The second command discards a `project.pbxproj` edit the generator makes, which breaks `ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS`.
+
+## Splash screen
+
+Startup has two layers. The native launch screen (triangular mark on white, Android 12+ included) is generated with `flutter_native_splash`, configured in `pubspec.yaml`:
+
+```sh
+dart run flutter_native_splash:create
+```
+
+Then the Flutter `/splash` route fades in the wordmark (`assets/images/tyba_wordmark.png`, exported from `assets/tyba.svg`). The `splashReady` provider waits for the universities prefetch and a minimum of 800 ms (`splashMinDuration`), whichever is later. A failed prefetch does not block: the list opens and shows its own error with retry.
 
 ## Testing
 

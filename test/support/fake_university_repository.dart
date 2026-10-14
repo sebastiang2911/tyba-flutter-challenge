@@ -21,8 +21,12 @@ class FakeUniversityRepository implements UniversityRepository {
   bool fail = false;
   List<University> universities;
 
+  /// When set, loading waits for it (simulates a slow fetch).
+  Future<void>? gate;
+
   @override
   Future<List<University>> getUniversities() async {
+    await gate;
     if (fail) throw const Failure('Could not load universities');
     return universities;
   }

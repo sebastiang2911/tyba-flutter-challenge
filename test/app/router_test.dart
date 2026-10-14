@@ -15,7 +15,7 @@ Future<GoRouter> _pump(WidgetTester tester) async {
 }
 
 void main() {
-  testWidgets('starts on the list route', (tester) async {
+  testWidgets('starts on the splash and then shows the list', (tester) async {
     await _pump(tester);
 
     expect(find.text('University 0'), findsOneWidget);
