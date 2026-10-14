@@ -39,8 +39,10 @@ class _StudentCountSectionState extends State<StudentCountSection> {
           '${StudentCountValidator.max}',
   };
 
+  void _dismissKeyboard() => FocusScope.of(context).unfocus();
+
   void _submit(String value) {
-    FocusScope.of(context).unfocus();
+    _dismissKeyboard();
     if (widget.onSubmit(value)) {
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
@@ -62,6 +64,7 @@ class _StudentCountSectionState extends State<StudentCountSection> {
             errorText: _message(widget.error),
           ),
           onSubmitted: _submit,
+          onTapOutside: (_) => _dismissKeyboard(),
         ),
         const SizedBox(height: 8),
         FilledButton.icon(
