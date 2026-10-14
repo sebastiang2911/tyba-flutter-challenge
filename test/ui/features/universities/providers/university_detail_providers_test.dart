@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tyba_technical_test/app/providers.dart';
@@ -86,6 +88,26 @@ void main() {
     expect(stateOf().profile.imagePath, '/tmp/picked.png');
     expect(stateOf().imageError, 'Could not pick the image');
   });
+
+  for (final fails in [false, true]) {
+    test('ignores a pick that resolves after the provider is disposed '
+        '(${fails ? 'failure' : 'success'})', () async {
+      final subscription = container.listen(
+        universityProfileProvider(2),
+        (_, _) {},
+      );
+      final notifier = container.read(universityProfileProvider(2).notifier);
+      profiles.pickGate = Completer<void>();
+      profiles.failPick = fails;
+
+      final pending = notifier.pickImage(PhotoSource.gallery);
+      subscription.close();
+      await Future<void>.delayed(Duration.zero);
+      profiles.pickGate!.complete();
+
+      await expectLater(pending, completes);
+    });
+  }
 
   test('saves a valid student count', () {
     final notifier = profileNotifier();
