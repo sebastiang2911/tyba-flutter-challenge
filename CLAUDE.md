@@ -54,7 +54,7 @@ You are a COORDINATOR: keep one thin thread, delegate heavy work to sub-agents, 
 ## Architecture & Conventions
 
 - Follow the `flutter-apply-architecture-best-practices` skill: UI (MVVM) / Data / optional Domain.
-- Layout is hybrid: `lib/data/{models,repositories,services}`, `lib/domain/{models,repositories,failures,validators}`, `lib/ui/{core,features/<feature>/{providers,views}}`, plus `lib/app/` (app, router, theme, infrastructure providers). `test/` mirrors `lib/`.
+- Layout is hybrid: `lib/data/{models,repositories,services}`, `lib/domain/{models,repositories,failures,validators}`, `lib/ui/{core,features/<feature>/{providers,views,widgets}}`, plus `lib/app/` (app, router, theme, infrastructure providers). `test/` mirrors `lib/`.
 - State: code-generated Riverpod providers (`@riverpod`, `riverpod_generator`): `Future` providers for data, notifiers for UI state, derived providers; repositories come from keepAlive providers in `lib/app/providers.dart`. Views are Consumer widgets (`ref.watch`/`ref.read`, `AsyncValue.when`); no business logic in Views. Tests override providers with fakes (`ProviderScope`/`ProviderContainer`). Generated `*.g.dart` files are committed.
 - Data: Services are stateless API wrappers; Repositories consume Services and return domain models. No use cases layer.
 - Navigation: `go_router`.
