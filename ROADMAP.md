@@ -20,6 +20,8 @@ Pending work for the Tyba technical test. Each step is delivered as a numbered O
 - [x] `010-app-icon`: generate iOS and Android app icon from the triangular mark in `assets/tyba.svg`
 - [x] `011-splash-screen`: native + Flutter splash screen using `assets/tyba.svg`
 - [x] `012-ui-ux-improvements`: brand light/dark theme, portrait-only, transitions (fade+slide, Hero, layout cross-fade), skeleton, load-more indicator, shared state widgets, detail feedback and a11y
+- [x] `013-refactor-views-widgets`: split large views into small, single-purpose widget files (container-presentational) under each feature's `widgets/` folder, so every view reads as a short composition; no behavior change, tests stay green
+- [ ] `014-dismiss-keyboard-on-tap-outside`: tapping outside the "Number of students" input closes the keyboard (`onTapOutside` or tap-to-unfocus on the detail), with a widget test
 
 ## Housekeeping
 

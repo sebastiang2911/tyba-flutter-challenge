@@ -56,7 +56,8 @@ lib/
     ├── core/                 # shared LoadingView, ErrorView, EmptyView, Skeleton
     └── features/universities/
         ├── providers/        # list and detail Riverpod providers (+ generated *.g.dart)
-        └── views/            # UniversitiesListView, UniversityDetailView
+        ├── views/            # UniversitiesListView, UniversityDetailView (screens only)
+        └── widgets/          # single-purpose widgets: tiles, cards, sections, heroes
 test/                         # mirrors lib/, plus test/support/ fakes
 ```
 
