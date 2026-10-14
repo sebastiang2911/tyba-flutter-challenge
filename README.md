@@ -18,22 +18,73 @@ Flutter app that lists universities from a remote JSON, lets the user switch bet
 
 ## Getting started
 
-Requirements: Flutter with Dart SDK `^3.13.5`.
+### Requirements
+
+- Flutter with Dart SDK `^3.13.5` (check with `flutter --version`; `flutter doctor` should be clean for your target).
+- Internet access at runtime: the universities JSON is fetched from S3 on every launch.
+- A target device: iOS simulator/device (needs macOS + Xcode) or Android emulator/device (needs Android Studio SDK).
+- A camera is optional: on simulators/emulators use the gallery option.
+
+| Platform | Minimum | Source |
+| --- | --- | --- |
+| iOS | 15.0 | `IPHONEOS_DEPLOYMENT_TARGET` in `ios/Runner.xcodeproj/project.pbxproj` |
+| Android | API 24 (Android 7.0) | `minSdk = flutter.minSdkVersion` in `android/app/build.gradle.kts`, which is 24 in Flutter 3.47; `compileSdk` is 36 |
+
+Android's minimum follows the installed Flutter version, so a different Flutter release may change it.
+
+### Run
 
 ```bash
 flutter pub get
 flutter run          # pick a device or emulator
+```
+
+The generated `*.g.dart` files are committed, so no code generation is needed to run the app. Only after changing a `@riverpod` provider:
+
+```bash
+dart run build_runner build -d      # or: dart run build_runner watch -d
+```
+
+### Quality checks
+
+```bash
 flutter analyze
 flutter test
 ```
 
-To run locally, keep the code generator running in a separate terminal before `flutter run`:
-
-```bash
-dart run build_runner watch -d
-```
-
 On a real device or emulator, the gallery and camera need the platform setup described in [Platform setup](#platform-setup).
+
+## Progress
+
+Every step was delivered as a numbered [OpenSpec](https://github.com/Fission-AI/OpenSpec) change (proposal, design, specs, tasks), merged by pull request. Details in `ROADMAP.md` and `openspec/changes/archive/`.
+
+| # | Change | Result |
+| --- | --- | --- |
+| 001 | setup-project-structure | Layered folder structure |
+| 002 | app-shell | `go_router`, `http`, app shell |
+| 003 | universities-data | Domain model, API service, repository with sequential `id` |
+| 004 | universities-list-viewmodel | List state, pagination by 20, list/grid toggle |
+| 005 | university-detail | Detail screen, gallery/camera image, student count validator, platform permissions |
+| 006 | add-test-coverage | Remaining test gaps closed |
+| 007 | readme-documentation | First README (architecture, decisions) |
+| 008 | fix-detail-back-navigation | Back from detail returns to the list |
+| 009 | migrate-to-riverpod | `provider` replaced by `flutter_riverpod` with code generation |
+| 010 | app-icon | iOS and Android launcher icon |
+| 011 | splash-screen | Native and animated Flutter splash |
+| 012 | ui-ux-improvements | Brand light/dark theme, portrait lock, transitions, skeleton, shared state widgets, a11y |
+| 013 | refactor-views-widgets | Views split into single-purpose widgets |
+| 014 | dismiss-keyboard-on-tap-outside | Keyboard closes when tapping outside the student count field |
+
+All required features and the bonus (hand-written infinite scroll) are implemented. Pending items are tracked as [GitHub issues](../../issues).
+
+## AI-assisted workflow
+
+The project was built with [Claude Code](https://claude.com/claude-code) under spec-driven development:
+
+- `CLAUDE.md` and `.github/copilot-instructions.md` hold the architecture rules, conventions and workflow the assistant follows.
+- `.claude/skills/` and `.claude/commands/` hold the project skills (`openspec-*`, `/commit`, `/opsx:*`).
+- Each feature starts as an OpenSpec change, then is implemented, tested, archived and merged by PR. Work items are tracked in GitHub issues using `.github/ISSUE_TEMPLATE/change.md`.
+- Commits follow Conventional Commits and reference their change number.
 
 ## Architecture
 
