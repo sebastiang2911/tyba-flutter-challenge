@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
-/// Tyba red, taken from the logo mark.
-const tybaRed = Color(0xFFD54028);
+/// Deep indigo used as the theme seed.
+const universityIndigo = Color(0xFF283593);
+
+/// Amber accent ("graduation gold") used as the secondary color.
+const universityAmber = Color(0xFFF2A93B);
 
 /// Tyba dark gray, taken from the logo mark.
 const tybaDarkGray = Color(0xFF1C262B);
@@ -12,24 +15,30 @@ ThemeData buildDarkTheme() => _build(Brightness.dark);
 
 ThemeData _build(Brightness brightness) {
   final seeded = ColorScheme.fromSeed(
-    seedColor: tybaRed,
+    seedColor: universityIndigo,
     brightness: brightness,
   );
+  final branded = seeded.copyWith(
+    secondary: universityAmber,
+    onSecondary: tybaDarkGray,
+  );
   final scheme = brightness == Brightness.dark
-      ? seeded.copyWith(surface: tybaDarkGray)
-      : seeded.copyWith(onSurface: tybaDarkGray);
+      ? branded.copyWith(surface: tybaDarkGray)
+      : branded.copyWith(onSurface: tybaDarkGray);
   return ThemeData(
     colorScheme: scheme,
     useMaterial3: true,
     appBarTheme: AppBarTheme(
-      backgroundColor: scheme.surface,
+      backgroundColor: universityIndigo,
+      foregroundColor: Colors.white,
       surfaceTintColor: Colors.transparent,
       centerTitle: false,
     ),
     cardTheme: CardThemeData(
-      elevation: 0,
-      color: scheme.surfaceContainerHighest,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 2,
+      color: scheme.surfaceContainerLow,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
     ),
     inputDecorationTheme: InputDecorationTheme(
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
