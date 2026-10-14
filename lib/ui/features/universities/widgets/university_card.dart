@@ -16,6 +16,7 @@ class UniversityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Card(
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -23,29 +24,28 @@ class UniversityCard extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  UniversityAvatarHero(
-                    id: university.id,
-                    name: university.name,
-                    radius: 16,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: UniversityTitleHero(
-                      id: university.id,
-                      name: university.name,
-                      style: Theme.of(context).textTheme.titleSmall,
-                      maxLines: 3,
-                    ),
-                  ),
-                ],
+              UniversityAvatarHero(
+                id: university.id,
+                name: university.name,
+                radius: 28,
               ),
-              const Spacer(),
-              Text(university.country),
+              const SizedBox(height: 12),
+              UniversityTitleHero(
+                id: university.id,
+                name: university.name,
+                style: theme.textTheme.titleSmall,
+                maxLines: 2,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                university.country,
+                style: theme.textTheme.bodySmall,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             ],
           ),
         ),

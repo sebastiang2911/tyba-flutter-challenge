@@ -1,4 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.INTERNET"/>
+
     <!-- No CAMERA permission: image_picker uses the system camera app, and
          declaring it would require a runtime request. -->
     <uses-feature android:name="android.hardware.camera" android:required="false"/>

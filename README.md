@@ -2,6 +2,22 @@
 
 Flutter app that lists universities from a remote JSON, lets the user switch between list and grid, and open a detail screen where an image and a student count can be assigned to a university.
 
+## Screenshots
+
+### Android
+
+|  | List | Grid | Detail |
+| :---: | :---: | :---: | :---: |
+| Light | <img src="docs/android/light_list_android.png" width="200" alt="Android light list"> | <img src="docs/android/light_grid_android.png" width="200" alt="Android light grid"> | <img src="docs/android/light_detail_android.png" width="200" alt="Android light detail"> |
+| Dark | <img src="docs/android/dark_list_android.png" width="200" alt="Android dark list"> | <img src="docs/android/dark_grid_android.png" width="200" alt="Android dark grid"> | <img src="docs/android/dark_detail_android.png" width="200" alt="Android dark detail"> |
+
+### iOS
+
+|  | List | Grid | Detail |
+| :---: | :---: | :---: | :---: |
+| Light | <img src="docs/iOS/light_list_ios.png" width="200" alt="iOS light list"> | <img src="docs/iOS/light_grid_ios.png" width="200" alt="iOS light grid"> | <img src="docs/iOS/light_detail_ios.png" width="200" alt="iOS light detail"> |
+| Dark | <img src="docs/iOS/dark_list_ios.png" width="200" alt="iOS dark list"> | <img src="docs/iOS/dark_grid_ios.png" width="200" alt="iOS dark grid"> | <img src="docs/iOS/dark_detail_ios.png" width="200" alt="iOS dark detail"> |
+
 ## Features
 
 - Branded startup: native launch screen, then an animated splash that prefetches the universities.
@@ -20,7 +36,7 @@ Flutter app that lists universities from a remote JSON, lets the user switch bet
 
 ### Requirements
 
-- Flutter with Dart SDK `^3.13.5` (check with `flutter --version`; `flutter doctor` should be clean for your target).
+- Flutter 3.47.7 (stable) or later, with Dart SDK `^3.13.5` (check with `flutter --version`; `flutter doctor` should be clean for your target).
 - Internet access at runtime: the universities JSON is fetched from S3 on every launch.
 - A target device: iOS simulator/device (needs macOS + Xcode) or Android emulator/device (needs Android Studio SDK).
 - A camera is optional: on simulators/emulators use the gallery option.
@@ -28,9 +44,7 @@ Flutter app that lists universities from a remote JSON, lets the user switch bet
 | Platform | Minimum | Source |
 | --- | --- | --- |
 | iOS | 15.0 | `IPHONEOS_DEPLOYMENT_TARGET` in `ios/Runner.xcodeproj/project.pbxproj` |
-| Android | API 24 (Android 7.0) | `minSdk = flutter.minSdkVersion` in `android/app/build.gradle.kts`, which is 24 in Flutter 3.47; `compileSdk` is 36 |
-
-Android's minimum follows the installed Flutter version, so a different Flutter release may change it.
+| Android | API 24 (Android 7.0) | `minSdk = 24` in `android/app/build.gradle.kts`; `compileSdk` is 36 |
 
 ### Run
 

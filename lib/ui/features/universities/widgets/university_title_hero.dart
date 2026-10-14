@@ -8,12 +8,14 @@ class UniversityTitleHero extends StatelessWidget {
     required this.name,
     this.style,
     this.maxLines,
+    this.textAlign,
   });
 
   final int id;
   final String name;
   final TextStyle? style;
   final int? maxLines;
+  final TextAlign? textAlign;
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +28,7 @@ class UniversityTitleHero extends StatelessWidget {
           name,
           style: style,
           maxLines: maxLines,
+          textAlign: textAlign,
           overflow: maxLines == null ? null : TextOverflow.ellipsis,
         ),
       ),

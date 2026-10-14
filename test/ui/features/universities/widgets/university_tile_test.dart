@@ -25,6 +25,8 @@ void main() {
 
     expect(find.text('Tyba University'), findsOneWidget);
     expect(find.text('Colombia'), findsOneWidget);
+    expect(find.byType(Card), findsOneWidget);
+    expect(find.byIcon(Icons.chevron_right), findsOneWidget);
 
     await tester.tap(find.byType(ListTile));
     expect(taps, 1);
