@@ -49,3 +49,6 @@ app.*.map.json
 
 #Documentation
 Frontend Engineers Test 1.pdf
+
+# Git worktrees (see /opsx:worktree)
+.trees/
