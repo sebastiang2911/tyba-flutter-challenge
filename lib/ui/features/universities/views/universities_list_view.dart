@@ -128,7 +128,7 @@ class _UniversitiesContent extends StatelessWidget {
 }
 
 void _openDetail(BuildContext context, University university) =>
-    context.go(AppRoutes.detailFor(university.id));
+    context.push(AppRoutes.detailFor(university.id));
 
 class _UniversityTile extends StatelessWidget {
   const _UniversityTile({required this.university});

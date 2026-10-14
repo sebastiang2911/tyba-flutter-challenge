@@ -69,7 +69,7 @@ View  ->  ViewModel  ->  Repository (interface)  ->  Service  ->  HTTP / image p
 
 - `main.dart` creates the concrete repositories and passes them to `App`.
 - `App` exposes them with `provider` (`Provider.value`) and creates the list ViewModel.
-- `go_router` defines two routes: `/` (list) and `/university/:id` (detail). The detail route creates its own ViewModel scoped to the screen.
+- `go_router` defines two routes: `/` (list) and `/university/:id` (detail). The detail route creates its own ViewModel scoped to the screen. The list opens it with `push`, so back returns to the list; if the detail was opened directly (no history), back navigates to `/`. The list opens it with `push`, so back returns to the list; if the detail was opened directly (no history), back navigates to `/`.
 - Views and ViewModels depend on the repository interfaces, so tests inject fakes (`test/support/`).
 
 ## Key decisions

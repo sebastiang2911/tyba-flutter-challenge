@@ -131,4 +131,26 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(UniversityDetailView), findsOneWidget);
   });
+
+  testWidgets('back from the detail returns to the list keeping the grid', (
+    tester,
+  ) async {
+    final router = buildRouter();
+    await _pump(tester, router: router);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Show grid'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('University 3'));
+    await tester.pumpAndSettle();
+    expect(find.byType(UniversityDetailView), findsOneWidget);
+    expect(find.byType(BackButton), findsOneWidget);
+
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(UniversityDetailView), findsNothing);
+    expect(find.byType(GridView), findsOneWidget);
+    expect(find.text('University 3'), findsOneWidget);
+  });
 }
