@@ -67,4 +67,49 @@ void main() {
 
     expect(find.text('Student count saved'), findsNothing);
   });
+
+  testWidgets('dismisses the keyboard when tapping outside the field', (
+    tester,
+  ) async {
+    String? submitted;
+    await tester.pumpWidget(
+      _wrap(
+        onSubmit: (value) {
+          submitted = value;
+          return true;
+        },
+      ),
+    );
+
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+    expect(tester.testTextInput.isVisible, isTrue);
+
+    await tester.enterText(find.byType(TextField), '500');
+    await tester.tapAt(const Offset(700, 500));
+    await tester.pump();
+
+    expect(tester.testTextInput.isVisible, isFalse);
+    expect(submitted, isNull);
+    expect(find.text('Student count saved'), findsNothing);
+  });
+
+  testWidgets('Save still submits after the field was focused', (tester) async {
+    String? submitted;
+    await tester.pumpWidget(
+      _wrap(
+        onSubmit: (value) {
+          submitted = value;
+          return true;
+        },
+      ),
+    );
+
+    await tester.enterText(find.byType(TextField), '42');
+    await tester.tap(find.text('Save'));
+    await tester.pump();
+
+    expect(submitted, '42');
+    expect(tester.testTextInput.isVisible, isFalse);
+  });
 }
