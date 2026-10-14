@@ -151,11 +151,56 @@ void main() {
 
     expect(profiles.getProfile(1).studentCount, 1500);
     expect(find.textContaining('Must be'), findsNothing);
+    expect(find.text('Student count saved'), findsOneWidget);
+  });
+
+  testWidgets('does not confirm an invalid student count', (tester) async {
+    await _pump(tester);
+
+    await _submit(tester, '0');
+
+    expect(find.text('Student count saved'), findsNothing);
+  });
+
+  testWidgets('dismisses the keyboard after saving', (tester) async {
+    await _pump(tester);
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+    expect(tester.testTextInput.isVisible, isTrue);
+
+    await _submit(tester, '10');
+
+    expect(tester.testTextInput.isVisible, isFalse);
+  });
+
+  testWidgets('only accepts digits in the student count field', (tester) async {
+    await _pump(tester);
+
+    await tester.enterText(find.byType(TextField), '1a2.5-');
+
+    expect(find.text('125'), findsOneWidget);
+  });
+
+  testWidgets('labels the image area for screen readers', (tester) async {
+    final semantics = tester.ensureSemantics();
+    await _pump(tester);
+    expect(
+      find.bySemanticsLabel('No image assigned to this university'),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.text('Gallery'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.bySemanticsLabel('Image assigned to this university'),
+      findsOneWidget,
+    );
+    semantics.dispose();
   });
 
   for (final (input, message) in [
     ('', 'Enter the number of students'),
-    ('12.5', 'Must be a whole number'),
     ('0', 'Must be between 1 and 10000000'),
   ]) {
     testWidgets('shows "$message" for "$input"', (tester) async {
