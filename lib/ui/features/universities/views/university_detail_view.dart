@@ -1,8 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../app/router.dart';
 import '../../../../domain/models/university.dart';
 import '../../../../domain/models/university_profile.dart';
 import '../../../../domain/validators/student_count_validator.dart';
@@ -18,30 +20,44 @@ class UniversityDetailView extends StatelessWidget {
       listenable: viewModel,
       builder: (context, _) {
         final state = viewModel.state;
-        return Scaffold(
-          appBar: AppBar(title: Text(state.university?.name ?? 'University')),
-          body: switch (state.status) {
-            UniversityDetailStatus.loading => const Center(
-              child: CircularProgressIndicator(),
-            ),
-            UniversityDetailStatus.error => Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(state.errorMessage ?? 'Something went wrong'),
-                  const SizedBox(height: 12),
-                  FilledButton(
-                    onPressed: viewModel.load,
-                    child: const Text('Retry'),
-                  ),
-                ],
-              ),
-            ),
-            UniversityDetailStatus.data => _DetailContent(
-              state: state,
-              viewModel: viewModel,
-            ),
+        return PopScope(
+          // Deep link: nothing below the detail, so go to the list on back.
+          canPop: context.canPop(),
+          onPopInvokedWithResult: (didPop, _) {
+            if (!didPop) context.go(AppRoutes.list);
           },
+          child: Scaffold(
+            appBar: AppBar(
+              leading: BackButton(
+                onPressed: () => context.canPop()
+                    ? context.pop()
+                    : context.go(AppRoutes.list),
+              ),
+              title: Text(state.university?.name ?? 'University'),
+            ),
+            body: switch (state.status) {
+              UniversityDetailStatus.loading => const Center(
+                child: CircularProgressIndicator(),
+              ),
+              UniversityDetailStatus.error => Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(state.errorMessage ?? 'Something went wrong'),
+                    const SizedBox(height: 12),
+                    FilledButton(
+                      onPressed: viewModel.load,
+                      child: const Text('Retry'),
+                    ),
+                  ],
+                ),
+              ),
+              UniversityDetailStatus.data => _DetailContent(
+                state: state,
+                viewModel: viewModel,
+              ),
+            },
+          ),
         );
       },
     );

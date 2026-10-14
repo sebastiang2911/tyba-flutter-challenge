@@ -14,7 +14,8 @@ Pending work for the Tyba technical test. Each step is delivered as a numbered O
 
 ## Next
 
-Nothing pending in the main flow.
+- [x] `008-fix-detail-back-navigation`: back from detail returns to the universities list (`go` -> `push`, handle deep-link fallback)
+- [ ] `009-migrate-to-riverpod`: replace `provider` with `flutter_riverpod` (ViewModels as Notifiers, `ProviderScope` DI), update CLAUDE.md/README conventions
 
 ## Housekeeping
 

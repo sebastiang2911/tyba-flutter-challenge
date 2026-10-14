@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tyba_technical_test/app/app.dart';
 import 'package:tyba_technical_test/app/router.dart';
 import 'package:tyba_technical_test/domain/models/university.dart';
+import 'package:tyba_technical_test/ui/features/universities/views/university_detail_view.dart';
 
 import '../../../../support/fake_university_profile_repository.dart';
 import '../../../../support/fake_university_repository.dart';
@@ -159,5 +160,50 @@ void main() {
     await _pump(tester, profiles: profiles);
 
     expect(find.text('321'), findsOneWidget);
+  });
+
+  testWidgets('back button goes to the list when opened directly', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 2000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      App(
+        repository: FakeUniversityRepository(buildUniversities(5)),
+        profileRepository: FakeUniversityProfileRepository(),
+        router: buildRouter()..go(AppRoutes.detailFor(1)),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(UniversityDetailView), findsOneWidget);
+
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(UniversityDetailView), findsNothing);
+    expect(find.text('University 0'), findsOneWidget);
+  });
+
+  testWidgets('system back goes to the list when opened directly', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 2000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      App(
+        repository: FakeUniversityRepository(buildUniversities(5)),
+        profileRepository: FakeUniversityProfileRepository(),
+        router: buildRouter()..go(AppRoutes.detailFor(1)),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+
+    expect(find.byType(UniversityDetailView), findsNothing);
+    expect(find.text('University 0'), findsOneWidget);
   });
 }
