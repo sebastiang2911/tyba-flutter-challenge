@@ -1,11 +1,19 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:tyba_technical_test/app/app.dart';
 import 'package:tyba_technical_test/app/router.dart';
+
+import '../support/fake_university_repository.dart';
 
 Future<GoRouter> _pump(WidgetTester tester) async {
   final router = buildRouter();
-  await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+  await tester.pumpWidget(
+    App(
+      repository: FakeUniversityRepository(buildUniversities(3)),
+      router: router,
+    ),
+  );
+  await tester.pumpAndSettle();
   return router;
 }
 
@@ -13,7 +21,7 @@ void main() {
   testWidgets('starts on the list route', (tester) async {
     await _pump(tester);
 
-    expect(find.text('Universities list'), findsOneWidget);
+    expect(find.text('University 0'), findsOneWidget);
   });
 
   testWidgets('resolves the detail route with its id', (tester) async {
