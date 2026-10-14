@@ -42,8 +42,10 @@ class UniversityProfileNotifier extends _$UniversityProfileNotifier {
       final profile = await ref
           .read(universityProfileRepositoryProvider)
           .pickImage(universityId, source);
+      if (!ref.mounted) return;
       state = UniversityProfileState(profile: profile);
     } on Failure catch (failure) {
+      if (!ref.mounted) return;
       state = UniversityProfileState(
         profile: state.profile,
         imageError: failure.message,
