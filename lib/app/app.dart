@@ -11,6 +11,7 @@ class App extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final appRouter = ref.watch(appRouterProvider);
     return MaterialApp.router(
+      debugShowCheckedModeBanner: false,
       title: 'Universities',
       theme: buildLightTheme(),
       darkTheme: buildDarkTheme(),
