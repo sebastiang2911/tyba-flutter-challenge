@@ -4,6 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../ui/features/splash/views/splash_view.dart';
 import '../ui/features/universities/views/universities_list_view.dart';
 import '../ui/features/universities/views/university_detail_view.dart';
+import 'transitions.dart';
 
 part 'router.g.dart';
 
@@ -26,13 +27,17 @@ GoRouter appRouter(Ref ref) {
       ),
       GoRoute(
         path: AppRoutes.list,
-        builder: (context, state) => const UniversitiesListView(),
+        pageBuilder: (context, state) =>
+            fadeSlidePage(state: state, child: const UniversitiesListView()),
       ),
       GoRoute(
         path: AppRoutes.detail,
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final id = int.parse(state.pathParameters['id']!);
-          return UniversityDetailView(id: id);
+          return fadeSlidePage(
+            state: state,
+            child: UniversityDetailView(id: id),
+          );
         },
       ),
     ],

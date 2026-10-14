@@ -3,19 +3,74 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router.dart';
-import '../../../../domain/failures/failure.dart';
 import '../../../../domain/models/university.dart';
+import '../../../core/skeleton.dart';
+import '../../../core/state_views.dart';
 import '../providers/providers.dart';
+import 'university_avatar_hero.dart';
+import 'university_title_hero.dart';
 
-class UniversitiesListView extends ConsumerStatefulWidget {
+class UniversitiesListView extends ConsumerWidget {
   const UniversitiesListView({super.key});
 
   @override
-  ConsumerState<UniversitiesListView> createState() =>
-      _UniversitiesListViewState();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final universities = ref.watch(universitiesProvider);
+    final layout = ref.watch(universitiesLayoutProvider);
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Universities'),
+        actions: [
+          IconButton(
+            tooltip: layout == UniversitiesLayout.list
+                ? 'Show grid'
+                : 'Show list',
+            icon: Icon(
+              layout == UniversitiesLayout.list
+                  ? Icons.grid_view
+                  : Icons.view_list,
+            ),
+            onPressed: ref.read(universitiesLayoutProvider.notifier).toggle,
+          ),
+        ],
+      ),
+      body: universities.when(
+        loading: () => const ListSkeleton(),
+        error: (error, _) => ErrorView.from(
+          error,
+          onRetry: () => ref.invalidate(universitiesProvider),
+        ),
+        data: (all) => all.isEmpty
+            ? const EmptyView(message: 'No universities found')
+            : AnimatedSwitcher(
+                duration: const Duration(milliseconds: 250),
+                layoutBuilder: (current, previous) => Stack(
+                  fit: StackFit.expand,
+                  children: [...previous, ?current],
+                ),
+                child: _UniversitiesContent(
+                  key: ValueKey(layout),
+                  layout: layout,
+                ),
+              ),
+      ),
+    );
+  }
 }
 
-class _UniversitiesListViewState extends ConsumerState<UniversitiesListView> {
+/// One scrollable per layout, each with its own controller so both can coexist
+/// while the layout switch cross-fades.
+class _UniversitiesContent extends ConsumerStatefulWidget {
+  const _UniversitiesContent({super.key, required this.layout});
+
+  final UniversitiesLayout layout;
+
+  @override
+  ConsumerState<_UniversitiesContent> createState() =>
+      _UniversitiesContentState();
+}
+
+class _UniversitiesContentState extends ConsumerState<_UniversitiesContent> {
   /// Distance from the end of the content (px) that triggers the next page.
   static const _loadMoreThreshold = 200.0;
 
@@ -43,77 +98,40 @@ class _UniversitiesListViewState extends ConsumerState<UniversitiesListView> {
 
   @override
   Widget build(BuildContext context) {
-    final universities = ref.watch(universitiesProvider);
-    final layout = ref.watch(universitiesLayoutProvider);
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Universities'),
-        actions: [
-          IconButton(
-            tooltip: layout == UniversitiesLayout.list
-                ? 'Show grid'
-                : 'Show list',
-            icon: Icon(
-              layout == UniversitiesLayout.list
-                  ? Icons.grid_view
-                  : Icons.view_list,
-            ),
-            onPressed: ref.read(universitiesLayoutProvider.notifier).toggle,
-          ),
-        ],
-      ),
-      body: universities.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(error is Failure ? error.message : 'Something went wrong'),
-              const SizedBox(height: 12),
-              FilledButton(
-                onPressed: () => ref.invalidate(universitiesProvider),
-                child: const Text('Retry'),
-              ),
-            ],
-          ),
-        ),
-        data: (all) => all.isEmpty
-            ? const Center(child: Text('No universities found'))
-            : _UniversitiesContent(layout: layout, controller: _controller),
-      ),
+    final visible = ref.watch(visibleUniversitiesProvider);
+    final items = visible.items;
+    const loadMore = Padding(
+      padding: EdgeInsets.all(16),
+      child: Center(child: CircularProgressIndicator()),
     );
-  }
-}
-
-class _UniversitiesContent extends ConsumerWidget {
-  const _UniversitiesContent({required this.layout, required this.controller});
-
-  final UniversitiesLayout layout;
-  final ScrollController controller;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final items = ref.watch(visibleUniversitiesProvider).items;
-    if (layout == UniversitiesLayout.grid) {
-      return GridView.builder(
-        controller: controller,
-        padding: const EdgeInsets.all(8),
-        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: 240,
-          mainAxisExtent: 120,
-          crossAxisSpacing: 8,
-          mainAxisSpacing: 8,
-        ),
-        itemCount: items.length,
-        itemBuilder: (context, index) =>
-            _UniversityCard(university: items[index]),
+    if (widget.layout == UniversitiesLayout.grid) {
+      return CustomScrollView(
+        controller: _controller,
+        slivers: [
+          SliverPadding(
+            padding: const EdgeInsets.all(8),
+            sliver: SliverGrid.builder(
+              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 240,
+                mainAxisExtent: 120,
+                crossAxisSpacing: 8,
+                mainAxisSpacing: 8,
+              ),
+              itemCount: items.length,
+              itemBuilder: (context, index) =>
+                  _UniversityCard(university: items[index]),
+            ),
+          ),
+          if (visible.hasMore) const SliverToBoxAdapter(child: loadMore),
+        ],
       );
     }
     return ListView.builder(
-      controller: controller,
-      itemCount: items.length,
-      itemBuilder: (context, index) =>
-          _UniversityTile(university: items[index]),
+      controller: _controller,
+      itemCount: items.length + (visible.hasMore ? 1 : 0),
+      itemBuilder: (context, index) => index == items.length
+          ? loadMore
+          : _UniversityTile(university: items[index]),
     );
   }
 }
@@ -129,8 +147,10 @@ class _UniversityTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: Text(university.name),
+      leading: UniversityAvatarHero(id: university.id, name: university.name),
+      title: UniversityTitleHero(id: university.id, name: university.name),
       subtitle: Text(university.country),
+      trailing: const Icon(Icons.chevron_right),
       onTap: () => _openDetail(context, university),
     );
   }
@@ -152,11 +172,24 @@ class _UniversityCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                university.name,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.titleSmall,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  UniversityAvatarHero(
+                    id: university.id,
+                    name: university.name,
+                    radius: 16,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: UniversityTitleHero(
+                      id: university.id,
+                      name: university.name,
+                      style: Theme.of(context).textTheme.titleSmall,
+                      maxLines: 3,
+                    ),
+                  ),
+                ],
               ),
               const Spacer(),
               Text(university.country),

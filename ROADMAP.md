@@ -19,7 +19,7 @@ Pending work for the Tyba technical test. Each step is delivered as a numbered O
 
 - [x] `010-app-icon`: generate iOS and Android app icon from the triangular mark in `assets/tyba.svg`
 - [x] `011-splash-screen`: native + Flutter splash screen using `assets/tyba.svg`
-- [ ] `012-ui-ux-improvements`: improve transitions, UI and UX (apply `flutter-ui-ux` skill)
+- [x] `012-ui-ux-improvements`: brand light/dark theme, portrait-only, transitions (fade+slide, Hero, layout cross-fade), skeleton, load-more indicator, shared state widgets, detail feedback and a11y
 
 ## Housekeeping
 

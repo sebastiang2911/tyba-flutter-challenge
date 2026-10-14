@@ -12,7 +12,9 @@ class App extends ConsumerWidget {
     final appRouter = ref.watch(appRouterProvider);
     return MaterialApp.router(
       title: 'Universities',
-      theme: buildAppTheme(),
+      theme: buildLightTheme(),
+      darkTheme: buildDarkTheme(),
+      themeMode: ThemeMode.system,
       routerConfig: appRouter,
     );
   }

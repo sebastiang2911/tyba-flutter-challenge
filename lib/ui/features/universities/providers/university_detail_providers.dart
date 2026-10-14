@@ -51,19 +51,21 @@ class UniversityProfileNotifier extends _$UniversityProfileNotifier {
     }
   }
 
-  /// Saves [input] when valid; otherwise exposes the validation error.
-  void submitStudentCount(String input) {
+  /// Saves [input] when valid and returns true; otherwise exposes the
+  /// validation error and returns false.
+  bool submitStudentCount(String input) {
     final error = StudentCountValidator.validate(input);
     if (error != null) {
       state = UniversityProfileState(
         profile: state.profile,
         studentCountError: error,
       );
-      return;
+      return false;
     }
     final profile = ref
         .read(universityProfileRepositoryProvider)
         .saveStudentCount(universityId, int.parse(input.trim()));
     state = UniversityProfileState(profile: profile);
+    return true;
   }
 }

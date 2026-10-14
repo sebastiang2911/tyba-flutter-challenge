@@ -7,12 +7,12 @@ Defines the universities list screen: load states, paginated reveal 20 at a time
 
 ### Requirement: List screen shows every load state
 
-The system SHALL show the universities screen in exactly one of four states: loading, error, empty or data. It SHALL start in loading when the screen opens.
+The system SHALL show the universities screen in exactly one of four states: loading, error, empty or data. It SHALL start in loading when the screen opens. Loading, error and empty presentations SHALL be consistent across screens.
 
 #### Scenario: Loading
 
 - **WHEN** the screen opens and universities are being fetched
-- **THEN** a progress indicator is shown
+- **THEN** skeleton placeholders shaped like the list items are shown
 
 #### Scenario: Data
 
@@ -50,17 +50,22 @@ The system SHALL initially show the first 20 universities in source order and SH
 
 ### Requirement: Layout can be toggled between list and grid
 
-The system SHALL let the user switch the universities presentation between a vertical list and a grid with one control, defaulting to list. The switch MUST keep the shown items and the scroll-driven pagination working.
+The system SHALL let the user switch the universities presentation between a vertical list and a grid with one control, defaulting to list. The switch MUST keep the shown items and the scroll-driven pagination working, and SHALL be animated with a cross-fade.
 
 #### Scenario: Switch to grid
 
 - **WHEN** the user activates the layout toggle while in list layout
-- **THEN** the same universities are shown as a grid
+- **THEN** the same universities are shown as a grid, cross-fading from the list
 
 #### Scenario: Switch back to list
 
 - **WHEN** the user activates the layout toggle while in grid layout
-- **THEN** the same universities are shown as a list
+- **THEN** the same universities are shown as a list, cross-fading from the grid
+
+#### Scenario: Pagination after switching
+
+- **WHEN** the user switches layout and scrolls near the end of the shown items
+- **THEN** the next page is still revealed
 
 ### Requirement: Selecting a university opens its detail
 
@@ -70,3 +75,17 @@ The system SHALL navigate to the detail route of a university, identified by its
 
 - **WHEN** the user taps a university
 - **THEN** the detail screen for that university's `id` opens
+
+### Requirement: Load-more indicator
+
+The system SHALL show a progress indicator after the last shown university while more universities remain to be revealed, and MUST NOT show it once all are shown.
+
+#### Scenario: More items remain
+
+- **WHEN** fewer universities are shown than loaded
+- **THEN** a progress indicator is shown after the last item
+
+#### Scenario: All items shown
+
+- **WHEN** all universities are shown
+- **THEN** no progress indicator is shown at the end

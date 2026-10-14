@@ -11,7 +11,9 @@ Flutter app that lists universities from a remote JSON, lets the user switch bet
 - Detail screen per university.
 - Assign an image from the gallery or the camera.
 - Enter the number of students, validated (required, integer, between 1 and 10,000,000).
-- Loading, error, empty and data states.
+- Loading (skeleton), error, empty and data states, with a load-more indicator.
+- Tyba light and dark themes (follow the system), portrait only.
+- Animated transitions: fade + slide between screens, Hero on the university initial avatar and name, list/grid cross-fade.
 - No persistence: image and student count live only for the current session.
 
 ## Getting started
@@ -51,6 +53,7 @@ lib/
 │   ├── services/             # UniversitiesApiService, ImagePickerService
 │   └── repositories/         # implementations of the domain contracts
 └── ui/
+    ├── core/                 # shared LoadingView, ErrorView, EmptyView, Skeleton
     └── features/universities/
         ├── providers/        # list and detail Riverpod providers (+ generated *.g.dart)
         └── views/            # UniversitiesListView, UniversityDetailView
@@ -90,6 +93,12 @@ View  ->  Provider  ->  Repository (interface)  ->  Service  ->  HTTP / image pi
 - **In-memory profile repository.** The test does not require persistence, so image path and student count are stored in a map behind `UniversityProfileRepository`. Swapping it for a persistent implementation does not touch the UI.
 - **Failures instead of raw exceptions.** Repositories throw `Failure` with a message safe to show; providers translate only `Failure`.
 - **No use cases layer.** Providers call repositories directly; the logic is thin enough that an extra layer would add ceremony without value.
+
+- **Brand theme from the logo.** `lib/app/theme.dart` seeds `ColorScheme` with the logo red (`#D54028`) and uses the logo dark gray (`#1C262B`) as dark surface / light text. `ThemeMode.system` follows the device; there is no manual toggle.
+- **Portrait only.** Locked in `Info.plist`, `AndroidManifest.xml` and `SystemChrome.setPreferredOrientations`, so the lock holds even if a platform file is regenerated.
+- **Motion with no packages.** `fadeSlidePage` (`lib/app/transitions.dart`) gives list and detail a fade + slide and is instant when the OS disables animations. The university initial avatar and name are two `Hero`s (list tile / grid card -> detail header row); the image is not (it is user-assigned and absent when the list renders). Layout switch uses `AnimatedSwitcher`; each layout owns its `ScrollController` so both can exist during the cross-fade (a shared controller would attach to two scrollables). Scroll offset therefore resets on switch.
+- **Shared state widgets.** `LoadingView`, `ErrorView`, `EmptyView` and `Skeleton` live in `lib/ui/core` and replace the duplicated list/detail code.
+- **Digits-only student count.** The field filters non-digits, so the validator's "not an integer" case can no longer be triggered from the UI; it stays as a domain safeguard. Saving shows a snackbar and dismisses the keyboard.
 
 ## Platform setup
 
@@ -132,4 +141,6 @@ Fakes live in `test/support/`. Run everything with `flutter test`.
 - No persistence between sessions (by design of the test).
 - `getUniversityById` reloads the full list from the network; caching the list in the repository would avoid repeated downloads.
 - The error state offers a plain Retry button; richer retry UX is undecided.
+- Portrait only: no landscape or tablet-specific layout.
+- The load-more spinner is brief: the next page is revealed synchronously from the loaded list.
 - Pagination is client-side: the whole JSON is downloaded once and revealed in pages.

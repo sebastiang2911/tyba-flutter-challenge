@@ -1,15 +1,18 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router.dart';
-import '../../../../domain/failures/failure.dart';
 import '../../../../domain/models/university.dart';
 import '../../../../domain/models/university_profile.dart';
 import '../../../../domain/validators/student_count_validator.dart';
+import '../../../core/state_views.dart';
 import '../providers/providers.dart';
+import 'university_avatar_hero.dart';
+import 'university_title_hero.dart';
 
 class UniversityDetailView extends ConsumerWidget {
   const UniversityDetailView({super.key, required this.id});
@@ -34,19 +37,10 @@ class UniversityDetailView extends ConsumerWidget {
           title: Text(university.value?.name ?? 'University'),
         ),
         body: university.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, _) => Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(error is Failure ? error.message : 'Something went wrong'),
-                const SizedBox(height: 12),
-                FilledButton(
-                  onPressed: () => ref.invalidate(universityProvider(id)),
-                  child: const Text('Retry'),
-                ),
-              ],
-            ),
+          loading: () => const LoadingView(),
+          error: (error, _) => ErrorView.from(
+            error,
+            onRetry: () => ref.invalidate(universityProvider(id)),
           ),
           data: (university) => _DetailContent(id: id, university: university),
         ),
@@ -102,33 +96,54 @@ class _ImageSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        AspectRatio(
-          aspectRatio: 16 / 9,
-          child: imagePath == null
-              ? const Card(child: Center(child: Text('No image assigned')))
-              : Image.file(
-                  File(imagePath!),
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, _, _) =>
-                      const Center(child: Icon(Icons.broken_image)),
-                ),
+        Semantics(
+          image: true,
+          excludeSemantics: true,
+          label: imagePath == null
+              ? 'No image assigned to this university'
+              : 'Image assigned to this university',
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: AspectRatio(
+              aspectRatio: 16 / 9,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: imagePath == null
+                    ? const _ImagePlaceholder(key: ValueKey('placeholder'))
+                    : Image.file(
+                        File(imagePath!),
+                        key: ValueKey(imagePath),
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        errorBuilder: (_, _, _) =>
+                            const Center(child: Icon(Icons.broken_image)),
+                      ),
+              ),
+            ),
+          ),
         ),
         const SizedBox(height: 8),
         Row(
           children: [
             Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () => onPick(PhotoSource.gallery),
-                icon: const Icon(Icons.photo_library),
-                label: const Text('Gallery'),
+              child: Tooltip(
+                message: 'Pick an image from the gallery',
+                child: OutlinedButton.icon(
+                  onPressed: () => onPick(PhotoSource.gallery),
+                  icon: const Icon(Icons.photo_library),
+                  label: const Text('Gallery'),
+                ),
               ),
             ),
             const SizedBox(width: 8),
             Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () => onPick(PhotoSource.camera),
-                icon: const Icon(Icons.photo_camera),
-                label: const Text('Camera'),
+              child: Tooltip(
+                message: 'Take a photo with the camera',
+                child: OutlinedButton.icon(
+                  onPressed: () => onPick(PhotoSource.camera),
+                  icon: const Icon(Icons.photo_camera),
+                  label: const Text('Camera'),
+                ),
               ),
             ),
           ],
@@ -146,6 +161,28 @@ class _ImageSection extends StatelessWidget {
   }
 }
 
+class _ImagePlaceholder extends StatelessWidget {
+  const _ImagePlaceholder({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return ColoredBox(
+      color: scheme.surfaceContainerHighest,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.add_photo_alternate_outlined, color: scheme.outline),
+            const SizedBox(height: 8),
+            const Text('No image assigned'),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _InfoSection extends StatelessWidget {
   const _InfoSection({required this.university});
 
@@ -156,7 +193,19 @@ class _InfoSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(university.name, style: Theme.of(context).textTheme.titleLarge),
+        Row(
+          children: [
+            UniversityAvatarHero(id: university.id, name: university.name),
+            const SizedBox(width: 12),
+            Expanded(
+              child: UniversityTitleHero(
+                id: university.id,
+                name: university.name,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+            ),
+          ],
+        ),
         const SizedBox(height: 8),
         _InfoRow(label: 'Country', value: university.country),
         if (university.stateProvince != null)
@@ -204,7 +253,7 @@ class _StudentCountSection extends StatefulWidget {
 
   final int? initialValue;
   final StudentCountError? error;
-  final ValueChanged<String> onSubmit;
+  final bool Function(String) onSubmit;
 
   @override
   State<_StudentCountSection> createState() => _StudentCountSectionState();
@@ -230,6 +279,15 @@ class _StudentCountSectionState extends State<_StudentCountSection> {
           '${StudentCountValidator.max}',
   };
 
+  void _submit(String value) {
+    FocusScope.of(context).unfocus();
+    if (widget.onSubmit(value)) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(const SnackBar(content: Text('Student count saved')));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -238,17 +296,18 @@ class _StudentCountSectionState extends State<_StudentCountSection> {
         TextField(
           controller: _controller,
           keyboardType: TextInputType.number,
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
           decoration: InputDecoration(
             labelText: 'Number of students',
-            border: const OutlineInputBorder(),
             errorText: _message(widget.error),
           ),
-          onSubmitted: widget.onSubmit,
+          onSubmitted: _submit,
         ),
         const SizedBox(height: 8),
-        FilledButton(
-          onPressed: () => widget.onSubmit(_controller.text),
-          child: const Text('Save'),
+        FilledButton.icon(
+          onPressed: () => _submit(_controller.text),
+          icon: const Icon(Icons.save_outlined),
+          label: const Text('Save'),
         ),
       ],
     );
