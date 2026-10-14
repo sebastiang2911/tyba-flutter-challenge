@@ -76,4 +76,4 @@ You are a COORDINATOR: keep one thin thread, delegate heavy work to sub-agents, 
 
 ## Current State
 
-App shell (`002-app-shell`), universities data layer (`003-universities-data`), list screen (`004-universities-list-viewmodel`), university detail (`005-university-detail`) and the Riverpod migration (`009-migrate-to-riverpod`) are done; see `ROADMAP.md` for pending work.
+App shell (`002-app-shell`), universities data layer (`003-universities-data`), list screen (`004-universities-list-viewmodel`), university detail (`005-university-detail`), the Riverpod migration (`009-migrate-to-riverpod`) and the splash screen (`011-splash-screen`) are done; see `ROADMAP.md` for pending work.

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -21,10 +23,14 @@ Future<({FakeUniversityRepository repository, GoRouter router})> _pump(
 
 void main() {
   testWidgets('shows a progress indicator while loading', (tester) async {
-    await _pump(tester);
+    final repository = FakeUniversityRepository(buildUniversities(45));
+    final gate = Completer<void>();
+    repository.gate = gate.future;
+    await pumpApp(tester, universities: repository, location: AppRoutes.list);
 
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
+    gate.complete();
     await tester.pumpAndSettle();
   });
 

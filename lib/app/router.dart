@@ -1,12 +1,14 @@
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../ui/features/splash/views/splash_view.dart';
 import '../ui/features/universities/views/universities_list_view.dart';
 import '../ui/features/universities/views/university_detail_view.dart';
 
 part 'router.g.dart';
 
 abstract final class AppRoutes {
+  static const splash = '/splash';
   static const list = '/';
   static const detail = '/university/:id';
 
@@ -16,8 +18,12 @@ abstract final class AppRoutes {
 @riverpod
 GoRouter appRouter(Ref ref) {
   return GoRouter(
-    initialLocation: AppRoutes.list,
+    initialLocation: AppRoutes.splash,
     routes: [
+      GoRoute(
+        path: AppRoutes.splash,
+        builder: (context, state) => const SplashView(),
+      ),
       GoRoute(
         path: AppRoutes.list,
         builder: (context, state) => const UniversitiesListView(),
