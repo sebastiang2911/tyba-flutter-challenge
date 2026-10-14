@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tyba_technical_test/app/app.dart';
 import 'package:tyba_technical_test/app/router.dart';
+import 'package:tyba_technical_test/domain/models/university.dart';
 
 import '../../../../support/fake_university_profile_repository.dart';
 import '../../../../support/fake_university_repository.dart';
@@ -10,6 +11,7 @@ Future<FakeUniversityProfileRepository> _pump(
   WidgetTester tester, {
   int id = 1,
   bool fail = false,
+  List<University>? universities,
   FakeUniversityProfileRepository? profiles,
 }) async {
   // Tall viewport so the lazy ListView builds the whole detail.
@@ -20,7 +22,8 @@ Future<FakeUniversityProfileRepository> _pump(
   final router = buildRouter();
   await tester.pumpWidget(
     App(
-      repository: FakeUniversityRepository(buildUniversities(5))..fail = fail,
+      repository: FakeUniversityRepository(universities ?? buildUniversities(5))
+        ..fail = fail,
       profileRepository: profiles,
       router: router,
     ),
@@ -47,6 +50,39 @@ void main() {
     expect(find.text('No image assigned'), findsOneWidget);
   });
 
+  testWidgets('shows the optional university fields', (tester) async {
+    await _pump(
+      tester,
+      universities: [
+        const University(
+          id: 0,
+          name: 'Full University',
+          country: 'Colombia',
+          alphaTwoCode: 'CO',
+          stateProvince: 'Antioquia',
+          domains: ['full.edu', 'full.org'],
+          webPages: ['https://full.edu', 'https://full.org'],
+        ),
+      ],
+      id: 0,
+    );
+
+    expect(find.textContaining('State/Province: Antioquia'), findsOneWidget);
+    expect(find.textContaining('Domains: full.edu, full.org'), findsOneWidget);
+    expect(
+      find.textContaining('https://full.edu\nhttps://full.org'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('hides the optional fields when absent', (tester) async {
+    await _pump(tester);
+
+    expect(find.textContaining('State/Province'), findsNothing);
+    expect(find.textContaining('Domains'), findsNothing);
+    expect(find.textContaining('Web pages'), findsNothing);
+  });
+
   testWidgets('shows an error when the university is missing', (tester) async {
     await _pump(tester, id: 99);
 
@@ -62,6 +98,25 @@ void main() {
 
     expect(find.text('No image assigned'), findsNothing);
     expect(find.byType(Image), findsOneWidget);
+  });
+
+  testWidgets('shows a fallback icon when the image cannot be loaded', (
+    tester,
+  ) async {
+    final profiles = FakeUniversityProfileRepository()
+      ..nextPickedPath = '/does/not/exist.png';
+    await _pump(tester, profiles: profiles);
+
+    await tester.tap(find.text('Gallery'));
+    await tester.pump(); // builds the Image, which starts the file read
+    // Let the real file IO fail before the frame that builds the fallback.
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 200)),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.byIcon(Icons.broken_image), findsOneWidget);
   });
 
   testWidgets('shows the picker failure', (tester) async {
