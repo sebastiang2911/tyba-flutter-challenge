@@ -9,7 +9,7 @@ The folder structure from `001-setup-project-structure` is in place, but the app
 - Add dependencies: `provider`, `go_router`, `http`.
 - Add `lib/app/theme.dart` (app `ThemeData`), `lib/app/router.dart` (`go_router` with `/` and `/university/:id`) and `lib/app/app.dart` (`MaterialApp.router`).
 - Add placeholder views for the two routes under `lib/ui/features/universities/views/` (static text only, no logic, no data).
-- Reduce `lib/main.dart` to `runApp(const App())`; remove the template counter code.
+- Reduce `lib/main.dart` to `runApp(App())`; remove the template counter code.
 - Replace `test/widget_test.dart` with tests for the app boot and the two routes.
 
 Out of scope: data layer, domain models, ViewModels, real list/detail UI, validators, and any provider registrations (added by the changes that introduce what they register).

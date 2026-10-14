@@ -20,7 +20,7 @@ After `001-setup-project-structure` the tree is empty folders plus the template 
 **Files and responsibilities.**
 
 ```
-lib/main.dart                  runApp(const App())
+lib/main.dart                  runApp(App())
 lib/app/app.dart               App: MaterialApp.router(routerConfig, theme)
 lib/app/router.dart            AppRoutes (path constants) + buildRouter()
 lib/app/theme.dart             buildAppTheme()
