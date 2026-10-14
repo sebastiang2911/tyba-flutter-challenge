@@ -10,10 +10,11 @@ Pending work for the Tyba technical test. Each step is delivered as a numbered O
 - [x] `004-universities-list-viewmodel`: list ViewModel (states, pagination by 20, list/grid toggle), real list screen and `provider` wiring (archived)
 - [x] `005-university-detail`: detail screen, image from gallery/camera, student count validator, `Info.plist` / `AndroidManifest.xml` config (archived)
 - [x] `006-add-test-coverage`: closed the remaining test gaps (`Failure`, `ImagePickerService`, detail view branches); every `lib/` line is covered (archived)
+- [x] `007-readme-documentation`: README with architecture, decisions and how to run (archived)
 
 ## Next
 
-- [ ] README: architecture, decisions, how to run
+Nothing pending in the main flow.
 
 ## Housekeeping
 
