@@ -24,6 +24,12 @@ flutter analyze
 flutter test
 ```
 
+To run locally, keep the code generator running in a separate terminal before `flutter run`:
+
+```bash
+dart run build_runner watch -d
+```
+
 On a real device or emulator, the gallery and camera need the platform setup described in [Platform setup](#platform-setup).
 
 ## Architecture
@@ -32,8 +38,8 @@ Layered architecture following the Flutter recommendations: UI (MVVM), Data, and
 
 ```
 lib/
-├── main.dart                 # composition root: builds services and repositories
-├── app/                      # App widget, go_router config, theme
+├── main.dart                 # entry point: ProviderScope around App
+├── app/                      # App widget, appRouter provider, theme, infrastructure providers
 ├── domain/
 │   ├── models/               # University, UniversityProfile
 │   ├── repositories/         # abstract contracts
@@ -45,7 +51,7 @@ lib/
 │   └── repositories/         # implementations of the domain contracts
 └── ui/
     └── features/universities/
-        ├── view_models/      # UniversitiesListViewModel, UniversityDetailViewModel
+        ├── providers/        # list and detail Riverpod providers (+ generated *.g.dart)
         └── views/            # UniversitiesListView, UniversityDetailView
 test/                         # mirrors lib/, plus test/support/ fakes
 ```
@@ -54,33 +60,35 @@ test/                         # mirrors lib/, plus test/support/ fakes
 | --- | --- |
 | Services | Stateless wrappers over external APIs (HTTP, image picker). |
 | Repositories | Use services, map API models to domain models, translate errors into `Failure`. |
-| ViewModels | Extend `ChangeNotifier`, receive repositories by constructor, expose an immutable state snapshot. |
-| Views | Render the state with `ListenableBuilder` and forward user events. No business logic. |
+| Providers | Code-generated Riverpod providers (`@riverpod`): small `Future` providers for data, notifiers for UI state, derived providers for what the view shows. They read repositories through providers. |
+| Views | Render with `ref.watch` and `AsyncValue.when` (Consumer widgets) and forward user events with `ref.read`. No business logic. |
 
 ### Data flow
 
 ```
-View  ->  ViewModel  ->  Repository (interface)  ->  Service  ->  HTTP / image picker
- ^            |
- +-- state ---+   (notifyListeners)
+View  ->  Provider  ->  Repository (interface)  ->  Service  ->  HTTP / image picker
+ ^           |
+ +-- state --+   (ref.watch rebuilds)
 ```
 
 ### Dependency injection and navigation
 
-- `main.dart` creates the concrete repositories and passes them to `App`.
-- `App` exposes them with `provider` (`Provider.value`) and creates the list ViewModel.
-- `go_router` defines two routes: `/` (list) and `/university/:id` (detail). The detail route creates its own ViewModel scoped to the screen. The list opens it with `push`, so back returns to the list; if the detail was opened directly (no history), back navigates to `/`. The list opens it with `push`, so back returns to the list; if the detail was opened directly (no history), back navigates to `/`.
-- Views and ViewModels depend on the repository interfaces, so tests inject fakes (`test/support/`).
+- `main.dart` runs `ProviderScope(child: App())`. `lib/app/providers.dart` builds the concrete http client, services and repositories as keepAlive providers; tests override them with fakes.
+- `App` is a `ConsumerWidget` that watches the `appRouter` provider.
+- List state is split into small providers: `universities` (Future), `universitiesLayout`, `visibleCount` and the derived `visibleUniversities`. Detail uses the `university(id)` family Future and the `universityProfileNotifier(id)` family notifier (both auto-dispose).
+- `go_router` defines two routes: `/` (list) and `/university/:id` (detail). The list opens the detail with `push`, so back returns to the list; if the detail was opened directly (no history), back navigates to `/`.
+- Views and providers depend on the repository interfaces, so tests inject fakes (`test/support/`).
+- Providers are code-generated. After changing one, run `dart run build_runner build -d`; the generated `*.g.dart` files are committed.
 
 ## Key decisions
 
 - **Sequential `id` in source order.** The JSON has no id and names repeat, so the repository assigns the index of each item before any sort or filter. The detail route uses it as its path parameter.
-- **Immutable state snapshots.** Each ViewModel keeps a single state object (`status`, data, errors) and replaces it on every change, which makes states explicit (`loading`, `error`, `empty`, `data`) and easy to assert in tests.
-- **Hand-written infinite scroll.** The list ViewModel pages the already loaded list in chunks of 20 (`pageSize`). The view listens to its `ScrollController` and asks for more when less than 200 px remain.
+- **Riverpod with code generation.** `AsyncValue` models loading, error and data explicitly (empty is a data case with an empty list), and state classes are immutable, so states are easy to assert in tests. Riverpod's automatic retry is disabled (`noRetry`): failures surface at once and the user retries with the button.
+- **Hand-written infinite scroll.** The list providers page the already loaded list in chunks of 20 (`pageSize`). The view listens to its `ScrollController` and asks for more when less than 200 px remain.
 - **Validation in the domain.** `StudentCountValidator` returns an error enum, not text, so the rule is testable without Flutter and the view decides the wording. It parses with `BigInt` so very long digit strings count as out of range instead of crashing.
 - **In-memory profile repository.** The test does not require persistence, so image path and student count are stored in a map behind `UniversityProfileRepository`. Swapping it for a persistent implementation does not touch the UI.
-- **Failures instead of raw exceptions.** Repositories throw `Failure` with a message safe to show; ViewModels catch only `Failure`.
-- **No use cases layer.** ViewModels call repositories directly; the logic is thin enough that an extra layer would add ceremony without value.
+- **Failures instead of raw exceptions.** Repositories throw `Failure` with a message safe to show; providers translate only `Failure`.
+- **No use cases layer.** Providers call repositories directly; the logic is thin enough that an extra layer would add ceremony without value.
 
 ## Platform setup
 
@@ -92,8 +100,8 @@ View  ->  ViewModel  ->  Repository (interface)  ->  Service  ->  HTTP / image p
 `test/` mirrors `lib/`:
 
 - **Unit:** validator, failure, API service, repository implementations, image picker service.
-- **ViewModel:** state transitions for loading, error, empty, pagination, layout toggle, image pick and student count.
-- **Widget:** list and detail views, `App` wiring and router.
+- **Providers:** `ProviderContainer` tests for state transitions for loading, error, empty, pagination, layout toggle, image pick and student count.
+- **Widget:** list and detail views, `App` wiring and router (`ProviderScope` overrides).
 
 Fakes live in `test/support/`. Run everything with `flutter test`.
 

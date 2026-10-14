@@ -1,30 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:tyba_technical_test/app/app.dart';
 import 'package:tyba_technical_test/app/router.dart';
 
 import 'package:tyba_technical_test/ui/features/universities/views/university_detail_view.dart';
 
 import '../../../../support/fake_university_repository.dart';
-import '../../../../support/fake_university_profile_repository.dart';
+import '../../../../support/pump_app.dart';
 
-Future<FakeUniversityRepository> _pump(
+Future<({FakeUniversityRepository repository, GoRouter router})> _pump(
   WidgetTester tester, {
   int count = 45,
   bool fail = false,
-  GoRouter? router,
 }) async {
   final repository = FakeUniversityRepository(buildUniversities(count))
     ..fail = fail;
-  await tester.pumpWidget(
-    App(
-      repository: repository,
-      profileRepository: FakeUniversityProfileRepository(),
-      router: router,
-    ),
-  );
-  return repository;
+  final router = await pumpApp(tester, universities: repository);
+  return (repository: repository, router: router);
 }
 
 void main() {
@@ -53,7 +45,7 @@ void main() {
   });
 
   testWidgets('shows error and retry reloads', (tester) async {
-    final repository = await _pump(tester, fail: true);
+    final (:repository, router: _) = await _pump(tester, fail: true);
     await tester.pumpAndSettle();
 
     expect(find.text('Could not load universities'), findsOneWidget);
@@ -115,8 +107,7 @@ void main() {
   testWidgets('tapping a university opens its detail in list and grid', (
     tester,
   ) async {
-    final router = buildRouter();
-    await _pump(tester, router: router);
+    final (repository: _, :router) = await _pump(tester);
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('University 2'));
@@ -135,8 +126,7 @@ void main() {
   testWidgets('back from the detail returns to the list keeping the grid', (
     tester,
   ) async {
-    final router = buildRouter();
-    await _pump(tester, router: router);
+    await _pump(tester);
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Show grid'));
     await tester.pumpAndSettle();

@@ -16,7 +16,7 @@ Flutter app (SDK ^3.13.5, Dart). Original time limit: 8 h. Delivery: public GitH
 
 ## Expertise
 
-Clean/Hexagonal/Screaming Architecture, Flutter/Dart, MVVM with ChangeNotifier + provider, testing, atomic design, container-presentational pattern.
+Clean/Hexagonal/Screaming Architecture, Flutter/Dart, MVVM with Riverpod Notifiers (flutter_riverpod), testing, atomic design, container-presentational pattern.
 
 ## Contextual Skill Loading (MANDATORY)
 
@@ -54,8 +54,8 @@ You are a COORDINATOR: keep one thin thread, delegate heavy work to sub-agents, 
 ## Architecture & Conventions
 
 - Follow the `flutter-apply-architecture-best-practices` skill: UI (MVVM) / Data / optional Domain.
-- Layout is hybrid: `lib/data/{models,repositories,services}`, `lib/domain/{models,repositories,failures,validators}`, `lib/ui/{core,features/<feature>/{view_models,views}}`, plus `lib/app/` (app, router, theme). `test/` mirrors `lib/`.
-- State: ViewModels extend `ChangeNotifier`, receive repositories via constructor, expose immutable state. Views use `ListenableBuilder`; no business logic in Views. DI with `provider`.
+- Layout is hybrid: `lib/data/{models,repositories,services}`, `lib/domain/{models,repositories,failures,validators}`, `lib/ui/{core,features/<feature>/{providers,views}}`, plus `lib/app/` (app, router, theme, infrastructure providers). `test/` mirrors `lib/`.
+- State: code-generated Riverpod providers (`@riverpod`, `riverpod_generator`): `Future` providers for data, notifiers for UI state, derived providers; repositories come from keepAlive providers in `lib/app/providers.dart`. Views are Consumer widgets (`ref.watch`/`ref.read`, `AsyncValue.when`); no business logic in Views. Tests override providers with fakes (`ProviderScope`/`ProviderContainer`). Generated `*.g.dart` files are committed.
 - Data: Services are stateless API wrappers; Repositories consume Services and return domain models. No use cases layer.
 - Navigation: `go_router`.
 - Repository assigns a sequential `id` in source order (JSON has no id, names repeat). Sort/filter never reassigns it.
@@ -69,10 +69,11 @@ You are a COORDINATOR: keep one thin thread, delegate heavy work to sub-agents, 
 ## Commands
 
 - `flutter pub get`
+- `dart run build_runner build -d` (after changing providers)
 - `flutter run`
 - `flutter analyze`
 - `flutter test`
 
 ## Current State
 
-App shell (`002-app-shell`), universities data layer (`003-universities-data`), list screen with ViewModel (`004-universities-list-viewmodel`) and university detail (`005-university-detail`) are done; see `ROADMAP.md` for pending work.
+App shell (`002-app-shell`), universities data layer (`003-universities-data`), list screen (`004-universities-list-viewmodel`), university detail (`005-university-detail`) and the Riverpod migration (`009-migrate-to-riverpod`) are done; see `ROADMAP.md` for pending work.

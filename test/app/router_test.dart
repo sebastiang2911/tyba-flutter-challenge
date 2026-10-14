@@ -1,19 +1,14 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:tyba_technical_test/app/app.dart';
 import 'package:tyba_technical_test/app/router.dart';
 
 import '../support/fake_university_repository.dart';
-import '../support/fake_university_profile_repository.dart';
+import '../support/pump_app.dart';
 
 Future<GoRouter> _pump(WidgetTester tester) async {
-  final router = buildRouter();
-  await tester.pumpWidget(
-    App(
-      repository: FakeUniversityRepository(buildUniversities(10)),
-      profileRepository: FakeUniversityProfileRepository(),
-      router: router,
-    ),
+  final router = await pumpApp(
+    tester,
+    universities: FakeUniversityRepository(buildUniversities(10)),
   );
   await tester.pumpAndSettle();
   return router;
