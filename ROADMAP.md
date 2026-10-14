@@ -17,6 +17,10 @@ Pending work for the Tyba technical test. Each step is delivered as a numbered O
 - [x] `008-fix-detail-back-navigation`: back from detail returns to the universities list (`go` -> `push`, handle deep-link fallback)
 - [x] `009-migrate-to-riverpod`: replace `provider` with `flutter_riverpod` (code-generated providers, `AsyncValue.when`, `ProviderScope` DI), update CLAUDE.md/README conventions
 
+- [x] `010-app-icon`: generate iOS and Android app icon from the triangular mark in `assets/tyba.svg`
+- [ ] `011-splash-screen`: native + Flutter splash screen using `assets/tyba.svg`
+- [ ] `012-ui-ux-improvements`: improve transitions, UI and UX (apply `flutter-ui-ux` skill)
+
 ## Housekeeping
 
 - [ ] Decide the retry UX in the error state (open question in the design)

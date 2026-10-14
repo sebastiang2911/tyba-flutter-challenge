@@ -95,6 +95,17 @@ View  ->  Provider  ->  Repository (interface)  ->  Service  ->  HTTP / image pi
 - **iOS:** `ios/Runner/Info.plist` declares `NSPhotoLibraryUsageDescription` and `NSCameraUsageDescription`.
 - **Android:** `AndroidManifest.xml` declares the camera feature as optional. The `CAMERA` permission is intentionally absent: `image_picker` opens the system camera app, and declaring the permission would force a runtime request.
 
+## App icon
+
+The launcher icon is the triangular mark of `assets/tyba.svg`. Sources live in `assets/icon/` (`tyba_mark.svg`, plus the 1024 px `app_icon.png` and `app_icon_foreground.png` rendered from it). iOS and Android icons (including the Android adaptive icon) are generated with `flutter_launcher_icons`, configured in `pubspec.yaml`:
+
+```sh
+dart run flutter_launcher_icons
+git checkout ios/Runner.xcodeproj/project.pbxproj
+```
+
+The second command discards a `project.pbxproj` edit the generator makes, which breaks `ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS`.
+
 ## Testing
 
 `test/` mirrors `lib/`:
