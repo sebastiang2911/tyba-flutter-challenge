@@ -11,17 +11,15 @@ Pending work for the Tyba technical test. Each step is delivered as a numbered O
 - [x] `005-university-detail`: detail screen, image from gallery/camera, student count validator, `Info.plist` / `AndroidManifest.xml` config (archived)
 - [x] `006-add-test-coverage`: closed the remaining test gaps (`Failure`, `ImagePickerService`, detail view branches); every `lib/` line is covered (archived)
 - [x] `007-readme-documentation`: README with architecture, decisions and how to run (archived)
-
-## Next
-
 - [x] `008-fix-detail-back-navigation`: back from detail returns to the universities list (`go` -> `push`, handle deep-link fallback)
 - [x] `009-migrate-to-riverpod`: replace `provider` with `flutter_riverpod` (code-generated providers, `AsyncValue.when`, `ProviderScope` DI), update CLAUDE.md/README conventions
-
 - [x] `010-app-icon`: generate iOS and Android app icon from the triangular mark in `assets/tyba.svg`
 - [x] `011-splash-screen`: native + Flutter splash screen using `assets/tyba.svg`
 - [x] `012-ui-ux-improvements`: brand light/dark theme, portrait-only, transitions (fade+slide, Hero, layout cross-fade), skeleton, load-more indicator, shared state widgets, detail feedback and a11y
 - [x] `013-refactor-views-widgets`: split large views into small, single-purpose widget files (container-presentational) under each feature's `widgets/` folder, so every view reads as a short composition; no behavior change, tests stay green
 - [x] `014-dismiss-keyboard-on-tap-outside`: tapping outside the "Number of students" input closes the keyboard (`onTapOutside` or tap-to-unfocus on the detail), with a widget test
+
+## Next
 
 ## Housekeeping
 
